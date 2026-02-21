@@ -32,6 +32,9 @@ jobs:
         
       - name: Create Linux Bundle Zip
         run: |
+          mkdir -p build/linux/x64/release/bundle/linux
+          cp linux/crypton.desktop build/linux/x64/release/bundle/linux/
+          cp linux/install.sh build/linux/x64/release/bundle/
           cd build/linux/x64/release/bundle
           zip -r ../../../../crypton-linux.zip .
           

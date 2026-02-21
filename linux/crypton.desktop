@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=Crypton
+GenericName=Password Manager
+Comment=Secure Password & Notes Vault
+Exec=env GDK_BACKEND=wayland crypton
+Icon=crypton
+Terminal=false
+Type=Application
+Categories=Utility;Security;
+Keywords=password;vault;secure;notes;
+StartupWMClass=crypton
