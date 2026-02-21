@@ -73,6 +73,8 @@ msix_config:
   msix_version: 1.0.0.0
   logo_path: assets/icon/icon.png
   capabilities: internetClient, location, microphone, webcam
+  certificate_path: crypton_cert.pfx
+  certificate_password: crypton123
 
 flutter_launcher_icons:
   android: "ic_launcher"
