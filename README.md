@@ -9,12 +9,17 @@
 - **Liquid Glass UI**: A modern, premium aesthetic with deep gradients and dynamic frosted glass effects.
 - **Robust Encryption**: Secure your sensitive data using industry-standard AES-256 encryption.
 - **Biometric Authentication**: Quick access using your system's biometric hardware (Windows Hello / Linux Biometrics).
-- **Multi-Platform Support**: Optimized for high performance on both Windows 11 and Linux environments.
+- **Multi-Platform Support**: Optimized for high performance on Android, Windows 11, and Linux environments.
 - **Privacy-First**: Your data stays local. No cloud storage, no telemetry.
 
 ---
 
 ## 🚀 Getting Started
+
+### Android
+1. **Download the APK**: Navigate to `build/app/outputs/flutter-apk/app-release.apk`.
+2. **Install**: Transfer the APK to your device and install it (ensure "Install from Unknown Sources" is enabled).
+3. **Run**: Launch "Crypton" from your app drawer.
 
 ### Windows
 1. **Download the MSIX Installer**: Navigate to `build/windows/x64/runner/Release/crypton.msix`.
@@ -42,6 +47,7 @@
 - Clang/C++ tools (for Linux builds)
 
 ### Build Commands
+- **Android Release (APK)**: `flutter build apk --release`
 - **Windows Release**: `flutter build windows --release`
 - **Linux Release**: `flutter build linux --release`
 - **Installer (Windows)**: `flutter pub run msix:create`
