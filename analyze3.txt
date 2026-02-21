@@ -1,0 +1,30 @@
+﻿Analyzing password-manager...                                   
+
+warning - The value of the field '_kUseBiometrics' isn't used - lib\core\auth_service.dart:22:16 - unused_field
+warning - The value of the field '_isInitialized' isn't used - lib\core\auth_service.dart:24:8 - unused_field
+warning - The value of the local variable 'uuid' isn't used - lib\core\auth_service.dart:139:11 - unused_local_variable
+warning - The value of the field '_iv' isn't used - lib\core\encryption_service.dart:9:25 - unused_field
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui\screens\desktop_home_screen.dart:185:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui\screens\desktop_home_screen.dart:268:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui\screens\desktop_home_screen.dart:367:41 - deprecated_member_use
+   info - The import of 'package:flutter/services.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' - lib\ui\screens\home_screen.dart:3:8 - unnecessary_import
+warning - Unused import: '../../core/encryption_service.dart' - lib\ui\screens\home_screen.dart:6:8 - unused_import
+  error - Expected to find ')' - lib\ui\screens\home_screen.dart:216:6 - expected_token
+  error - Expected to find ']' - lib\ui\screens\home_screen.dart:216:6 - expected_token
+warning - The declaration '_buildPasswordTile' isn't referenced - lib\ui\screens\home_screen.dart:262:10 - unused_element
+  error - Expected to find ')' - lib\ui\screens\home_screen.dart:391:6 - expected_token
+  error - Expected to find ']' - lib\ui\screens\home_screen.dart:391:6 - expected_token
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui\screens\home_screen.dart:425:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui\screens\lock_screen.dart:249:86 - deprecated_member_use
+   info - 'Share' is deprecated and shouldn't be used. Use SharePlus instead - lib\ui\screens\settings_tab.dart:42:13 - deprecated_member_use
+   info - 'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead - lib\ui\screens\settings_tab.dart:42:19 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\ui\screens\settings_tab.dart:62:29 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\ui\screens\settings_tab.dart:69:25 - use_build_context_synchronously
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\ui\theme.dart:28:9 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui\theme.dart:57:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui\theme.dart:71:54 - deprecated_member_use
+   info - 'MaterialStateProperty' is deprecated and shouldn't be used. Use WidgetStateProperty instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre - lib\ui\theme.dart:110:25 - deprecated_member_use
+   info - 'MaterialStateProperty' is deprecated and shouldn't be used. Use WidgetStateProperty instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre - lib\ui\theme.dart:113:20 - deprecated_member_use
+   info - 'MaterialState' is deprecated and shouldn't be used. Use WidgetState instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre - lib\ui\theme.dart:114:31 - deprecated_member_use
+   info - Don't invoke 'print' in production code - read_errors.dart:1:33 - avoid_print
+

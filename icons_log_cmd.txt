@@ -1,0 +1,19 @@
+  ════════════════════════════════════════════
+     FLUTTER LAUNCHER ICONS (v0.13.1)                               
+  ════════════════════════════════════════════
+  
+Unhandled exception:
+
+✗ ERROR: InvalidConfigException 
+line 71, column 8: Unsupported value for "web". type 'bool' is not a subtype of type 'Map<dynamic, dynamic>' in type cast
+   ╷
+71 │   web: true
+   │        ^^^^
+   ╵
+#0      Config._getConfigFromPubspecYaml (package:flutter_launcher_icons/config/config.dart:95:7)
+#1      Config.loadConfigFromPubSpec (package:flutter_launcher_icons/config/config.dart:59:12)
+#2      loadConfigFileFromArgResults (package:flutter_launcher_icons/main.dart:178:14)
+#3      createIconsFromArguments (package:flutter_launcher_icons/main.dart:82:9)
+#4      main (file:///C:/Users/itsam/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_launcher_icons-0.13.1/bin/flutter_launcher_icons.dart:7:26)
+#5      _delayEntrypointInvocation.<anonymous closure> (dart:isolate-patch/isolate_patch.dart:312:33)
+#6      _RawReceivePort._handleMessage (dart:isolate-patch/isolate_patch.dart:193:12)
