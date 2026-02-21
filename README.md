@@ -26,16 +26,29 @@
 2. **Install**: Double-click the installer and follow the prompts.
 3. **Run**: Launch "Crypton" from your Start Menu.
 
-### Linux (Arch Linux)
-1. **Prepare Dependencies**:
+### Linux (Arch Linux / Hyprland)
+
+#### 🚀 Automated Install (Recommended)
+This method is optimized for **Hyprland/Wayland** and sets up your app launcher automatically.
+1. **Download**: Get `crypton-linux.zip` from Your GitHub repository's **Actions** tab.
+2. **Install**:
    ```bash
-   sudo pacman -S --needed flutter-sdk-bin clang cmake ninja pkg-config gtk3 libsecret
+   unzip crypton-linux.zip -d crypton-app
+   cd crypton-app
+   ./install.sh
    ```
-2. **Build the Binary**:
+3. **Launch**: Search for **"Crypton"** in your launcher (`wofi`, `rofi`, `tofi`, etc.).
+
+#### 🛠️ Manual Install
+1. **Prerequisites**: `sudo pacman -S --needed gtk3 libsecret`
+2. **Setup**:
+   - Extract the binary bundle to a permanent folder.
+   - Make the binary executable: `chmod +x crypton`
+3. **Wayland Support**: To run natively on Wayland, use:
    ```bash
-   flutter build linux --release
+   GDK_BACKEND=wayland ./crypton
    ```
-3. **Run the App**: `./build/linux/x64/release/bundle/crypton`
+4. **Shortcut**: Copy the `crypton.desktop` file to `~/.local/share/applications/` and edit the `Exec` line to point to your binary's full path.
 
 ---
 
