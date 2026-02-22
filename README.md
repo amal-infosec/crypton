@@ -40,7 +40,7 @@ This method is optimized for **Hyprland/Wayland** and sets up your app launcher 
 3. **Launch**: Search for **"Crypton"** in your launcher (`wofi`, `rofi`, `tofi`, etc.).
 
 #### 🛠️ Manual Install
-1. **Prerequisites**: `sudo pacman -S --needed gtk3 libsecret`
+1. **Prerequisites**: `sudo pacman -S --needed gtk3 libsecret xdg-desktop-portal-gtk`
 2. **Setup**:
    - Extract the binary bundle to a permanent folder.
    - Make the binary executable: `chmod +x crypton`
@@ -49,6 +49,7 @@ This method is optimized for **Hyprland/Wayland** and sets up your app launcher 
    GDK_BACKEND=wayland ./crypton
    ```
 4. **Shortcut**: Copy the `crypton.desktop` file to `~/.local/share/applications/` and edit the `Exec` line to point to your binary's full path.
+5. **Import/Export**: If the file picker fails, the app provides a manual path entry fallback. For a seamless experience, ensure `xdg-desktop-portal-gtk` (or equivalent) is installed and active.
 
 ---
 

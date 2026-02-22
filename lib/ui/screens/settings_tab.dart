@@ -100,11 +100,20 @@ class _SettingsTabState extends State<SettingsTab> {
         result = await FilePicker.platform.pickFiles();
       } catch (e) {
         // Portal error on Linux usually
-        if (context.mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('File picker failed. If on Linux, ensure xdg-desktop-portal is installed.'), backgroundColor: Colors.red, duration: Duration(seconds: 5)));
+        if (!kIsWeb && Platform.isLinux) {
+          final fallbackPath = await _showLinuxImportFallback(context, ['.xtm']);
+          if (fallbackPath != null) {
+            result = FilePickerResult([PlatformFile(path: fallbackPath, name: fallbackPath.split('/').last, size: File(fallbackPath).lengthSync())]);
+          } else {
+            return; // User cancelled or failed
+          }
+        } else {
+          if (context.mounted) {
+             ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('File picker failed. Please ensure your system file picker is working.'), backgroundColor: Colors.red));
+          }
+          return;
         }
-        return;
       }
       
       if (result == null || result.files.isEmpty) return;
@@ -113,6 +122,7 @@ class _SettingsTabState extends State<SettingsTab> {
       if (!context.mounted) return;
       final password = await _promptBackupPassword(context, 'Enter Backup Password', isNew: false);
       if (password == null || password.isEmpty) return;
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Decrypting & Restoring...')));
       try {
         final decryptedBytes = EncryptionService.decryptDataWithPassword(bytes, password);
@@ -139,10 +149,27 @@ class _SettingsTabState extends State<SettingsTab> {
 
   Future<void> _importFromBrowser(BuildContext context, String browser) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['csv', 'json'],
-      );
+      FilePickerResult? result;
+      final extensions = ['csv', 'json'];
+      
+      try {
+        result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: extensions,
+        );
+      } catch (e) {
+        if (!kIsWeb && Platform.isLinux) {
+          final fallbackPath = await _showLinuxImportFallback(context, extensions.map((e) => '.$e').toList());
+          if (fallbackPath != null) {
+             result = FilePickerResult([PlatformFile(path: fallbackPath, name: fallbackPath.split('/').last, size: File(fallbackPath).lengthSync())]);
+          } else {
+            return;
+          }
+        } else {
+          rethrow;
+        }
+      }
+
       if (result == null || result.files.isEmpty) return;
       final filePath = result.files.single.path!;
       
@@ -181,6 +208,103 @@ class _SettingsTabState extends State<SettingsTab> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Import failed: $e'), backgroundColor: Colors.red));
       }
     }
+  }
+
+  Future<String?> _showLinuxImportFallback(BuildContext context, List<String> extensions) async {
+    String? manualPath;
+    List<File> downloadsFiles = [];
+    
+    try {
+      final downloadsDir = await getDownloadsDirectory();
+      if (downloadsDir != null) {
+        downloadsFiles = downloadsDir.listSync()
+          .whereType<File>()
+          .where((f) => extensions.any((ext) => f.path.toLowerCase().endsWith(ext)))
+          .toList();
+        // Sort by modification date (newest first)
+        downloadsFiles.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+      }
+    } catch (_) {}
+
+    if (!context.mounted) return null;
+
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => _GlassDialog(
+        title: '📂 Linux Import Fallback',
+        icon: Icons.folder_open,
+        iconColor: Colors.tealAccent,
+        children: [
+          const Text(
+            'System file picker failed. This usually happens if xdg-desktop-portal is missing or misconfigured.',
+            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          if (downloadsFiles.isNotEmpty) ...[
+            const Text('Recent matching files in Downloads:', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+            const SizedBox(height: 8),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 180),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white10),
+              ),
+              child: ListView.separated(
+                shrinkWrap: true,
+                padding: const EdgeInsets.all(4),
+                itemCount: downloadsFiles.length > 5 ? 5 : downloadsFiles.length,
+                separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 1),
+                itemBuilder: (context, i) {
+                  final file = downloadsFiles[i];
+                  final name = file.path.split('/').last;
+                  return ListTile(
+                    dense: true,
+                    visualDensity: VisualDensity.compact,
+                    title: Text(name, style: const TextStyle(color: Colors.white, fontSize: 12), overflow: TextOverflow.ellipsis),
+                    subtitle: Text(DateFormat('MMM dd, HH:mm').format(file.lastModifiedSync()), style: const TextStyle(color: Colors.white38, fontSize: 10)),
+                    trailing: const Icon(Icons.chevron_right, color: Colors.white24, size: 16),
+                    onTap: () => Navigator.pop(ctx, file.path),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+          const Text('Or Enter Manual Absolute Path:', style: TextStyle(color: Colors.white54, fontSize: 12)),
+          const SizedBox(height: 8),
+          TextField(
+            autofocus: downloadsFiles.isEmpty,
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+            decoration: InputDecoration(
+              hintText: '/home/user/Downloads/backup.xtm',
+              hintStyle: const TextStyle(color: Colors.white24),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white24)),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white24)),
+              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.tealAccent)),
+            ),
+            onChanged: (v) => manualPath = v,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '💡 Tip: Install xdg-desktop-portal-gtk or xdg-desktop-portal-kde to fix this permanently.',
+            style: TextStyle(color: Colors.tealAccent, fontSize: 10),
+          ),
+        ],
+        actions: [
+          _dialogBtn('Cancel', () => Navigator.pop(ctx), outline: true),
+          _dialogBtn('Import Path', () {
+            if (manualPath != null && manualPath!.isNotEmpty) {
+              if (File(manualPath!).existsSync()) {
+                Navigator.pop(ctx, manualPath);
+              } else {
+                ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('File not found at specified path')));
+              }
+            }
+          }, color: Colors.tealAccent.withOpacity(0.3)),
+        ],
+      ),
+    );
   }
 
   Future<String?> _promptBackupPassword(BuildContext context, String title, {required bool isNew}) async {
