@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev libjsoncpp-dev zip
       
       - name: Enable Linux support
         run: flutter config --enable-linux-desktop
@@ -36,7 +36,9 @@ jobs:
           cp linux/crypton.desktop build/linux/x64/release/bundle/linux/
           cp linux/install.sh build/linux/x64/release/bundle/
           cd build/linux/x64/release/bundle
-          zip -r ../../../../crypton-linux.zip .
+          zip -r ../../../../../crypton-linux.zip .
+          cd ../../../../../
+          ls -lh crypton-linux.zip
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
