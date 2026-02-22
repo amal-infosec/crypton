@@ -9,11 +9,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import '../../core/storage_service.dart';
 import '../../core/encryption_service.dart';
 import '../../core/auth_service.dart';
 import '../screens/lock_screen.dart';
 import '../../core/import_service.dart';
+import '../../models/data_models.dart';
 
 class SettingsTab extends StatefulWidget {
   final String activeTab;
