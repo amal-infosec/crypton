@@ -13,6 +13,7 @@ import '../../core/storage_service.dart';
 import '../../core/encryption_service.dart';
 import '../../core/auth_service.dart';
 import '../screens/lock_screen.dart';
+import '../../core/import_service.dart';
 
 class SettingsTab extends StatefulWidget {
   final String activeTab;
@@ -42,7 +43,46 @@ class _SettingsTabState extends State<SettingsTab> {
       final fileName = 'crypton_backup_$dateStr.xtm';
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsBytes(encryptedBytes);
-      await Share.shareXFiles([XFile(file.path)], text: 'CRYPTON Encrypted Backup');
+      
+      if (!kIsWeb && Platform.isLinux) {
+        // Linux fix: use FilePicker.saveFile and fallback to Downloads folder if portal fails
+        String? selectedPath;
+        try {
+          selectedPath = await FilePicker.platform.saveFile(
+            dialogTitle: 'Save Crypton Backup',
+            fileName: fileName,
+          );
+        } catch (e) {
+          // Fallback if portal fails
+        }
+
+        if (selectedPath != null) {
+          await file.copy(selectedPath);
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup saved to $selectedPath')));
+          }
+        } else {
+          // Attempt default Downloads folder
+          try {
+            final downloadsDir = await getDownloadsDirectory();
+            if (downloadsDir != null) {
+              final destFile = File('${downloadsDir.path}/$fileName');
+              await file.copy(destFile.path);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Saved to Downloads: $fileName')));
+              }
+            } else {
+               throw 'Could not find downloads directory';
+            }
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Export Failed: Saving not possible.'), backgroundColor: Colors.red));
+            }
+          }
+        }
+      } else {
+        await Share.shareXFiles([XFile(file.path)], text: 'CRYPTON Encrypted Backup');
+      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -53,7 +93,18 @@ class _SettingsTabState extends State<SettingsTab> {
 
   Future<void> _importData(BuildContext context) async {
     try {
-      final result = await FilePicker.platform.pickFiles();
+      FilePickerResult? result;
+      try {
+        result = await FilePicker.platform.pickFiles();
+      } catch (e) {
+        // Portal error on Linux usually
+        if (context.mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('File picker failed. If on Linux, ensure xdg-desktop-portal is installed.'), backgroundColor: Colors.red, duration: Duration(seconds: 5)));
+        }
+        return;
+      }
+      
       if (result == null || result.files.isEmpty) return;
       final file = File(result.files.single.path!);
       final bytes = await file.readAsBytes();
@@ -80,6 +131,52 @@ class _SettingsTabState extends State<SettingsTab> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Import Error: $e'), backgroundColor: Colors.red));
+      }
+    }
+  }
+
+  Future<void> _importFromBrowser(BuildContext context, String browser) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv', 'json'],
+      );
+      if (result == null || result.files.isEmpty) return;
+      final filePath = result.files.single.path!;
+      
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Importing from $browser...')));
+      
+      final encryptionService = context.read<EncryptionService>();
+      final importService = ImportService(encryptionService);
+      final storage = context.read<StorageService>();
+      
+      List<PasswordEntry> entries;
+      final extension = filePath.split('.').last.toLowerCase();
+      
+      if (extension == 'json') {
+        entries = await importService.parseBitwardenJson(filePath);
+      } else if (browser == 'Firefox') {
+        entries = await importService.parseFirefoxCsv(filePath);
+      } else {
+        // Chrome, Brave, etc use standard Chrome format
+        entries = await importService.parseChromeCsv(filePath);
+      }
+      
+      if (entries.isEmpty) {
+        if (context.mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No valid passwords found in file.'), backgroundColor: Colors.orange));
+        }
+        return;
+      }
+      
+      await storage.addAllPasswords(entries);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Successfully imported ${entries.length} passwords!')));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Import failed: $e'), backgroundColor: Colors.red));
       }
     }
   }
@@ -609,7 +706,12 @@ class _SettingsTabState extends State<SettingsTab> {
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                   );
                 }
-                return _ImportCard(badge: badge, name: item['name'] as String, sub: item['sub'] as String);
+                return _ImportCard(
+                   badge: badge, 
+                   name: item['name'] as String, 
+                   sub: item['sub'] as String,
+                   onTap: () => _importFromBrowser(context, item['name'] as String),
+                );
               },
             ),
           ),
@@ -1055,7 +1157,8 @@ class _ImportCard extends StatefulWidget {
   final Widget badge;
   final String name;
   final String sub;
-  const _ImportCard({required this.badge, required this.name, required this.sub});
+  final VoidCallback onTap;
+  const _ImportCard({required this.badge, required this.name, required this.sub, required this.onTap});
 
   @override
   State<_ImportCard> createState() => _ImportCardState();
@@ -1071,12 +1174,7 @@ class _ImportCardState extends State<_ImportCard> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
-        onTap: () async {
-          await FilePicker.platform.pickFiles(
-            type: FileType.custom,
-            allowedExtensions: ['csv', 'json', 'txt', 'xml', 'zip', '1pux', '1pif'],
-          );
-        },
+        onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
           curve: Curves.easeOutCubic,

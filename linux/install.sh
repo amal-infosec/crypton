@@ -28,6 +28,8 @@ chmod +x "$BIN_DIR/crypton"
 
 # 4. Install Desktop Entry
 cp "$INSTALL_DIR/linux/crypton.desktop" "$APP_DIR/"
+cp "$INSTALL_DIR/linux/uninstall.sh" "$BIN_DIR/crypton-uninstall"
+chmod +x "$BIN_DIR/crypton-uninstall"
 
 # 5. Install Icon
 # Note: Falling back to flutter_assets path if direct icon isn't found

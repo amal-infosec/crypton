@@ -47,6 +47,7 @@ dependencies:
   uuid: ^4.5.2
   intl: ^0.20.2
   google_fonts: ^8.0.1
+  csv: ^6.0.0
 
   crypto: any
   window_manager: ^0.5.1

@@ -133,4 +133,9 @@ class StorageService extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  Future<void> addAllPasswords(List<PasswordEntry> entries) async {
+    await _passwordBox.addAll(entries);
+    notifyListeners();
+  }
 }
