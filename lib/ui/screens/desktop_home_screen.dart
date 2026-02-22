@@ -157,22 +157,11 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
                   title: 'All vaults',
                   icon: Icons.all_inclusive,
                   count: allPasswords.length,
-                  isSelected: _selectedSection == 'All Vaults',
+                  isSelected: _selectedSection == 'All Vaults' || _vaultCategories.any((cat) => cat.name == _selectedSection),
                   onTap: () => setState(() => _selectedSection = 'All Vaults'),
                   isHighlighted: true,
                   highlightColor: const Color(0xFFB388FF),
                 ),
-                const SizedBox(height: 8),
-                ..._vaultCategories.map((cat) {
-                  final count = allPasswords.where((p) => p.category == cat.name).length;
-                  return _buildSidebarItem(
-                    title: cat.name,
-                    icon: cat.icon,
-                    count: count,
-                    isSelected: _selectedSection == cat.name,
-                    onTap: () => setState(() => _selectedSection = cat.name),
-                  );
-                }),
                 
                 const SizedBox(height: 24),
                 const Divider(color: Colors.white12),
@@ -189,18 +178,22 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
                   isHighlighted: true,
                   highlightColor: const Color(0xFF81D4FA),
                 ),
-                
-                const SizedBox(height: 24),
-                const Divider(color: Colors.white12),
-                const SizedBox(height: 8),
-
-                _buildSidebarItem(
-                  title: 'Settings',
-                  icon: Icons.settings,
-                  isSelected: _selectedSection == 'Settings',
-                  onTap: () => setState(() => _selectedSection = 'Settings'),
-                ),
               ],
+            ),
+          ),
+
+          // Settings at bottom left
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Divider(color: Colors.white12),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+            child: _buildSidebarItem(
+              title: 'Settings',
+              icon: Icons.settings,
+              isSelected: _selectedSection == 'Settings',
+              onTap: () => setState(() => _selectedSection = 'Settings'),
             ),
           ),
         ],
@@ -305,7 +298,10 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
   Widget _buildMainContent() {
     Widget content;
     if (_selectedSection == 'All Vaults' || _vaultCategories.any((c) => c.name == _selectedSection)) {
-       content = PasswordListTab(categoryFilter: _selectedSection);
+       content = PasswordListTab(
+         categoryFilter: _selectedSection,
+         onCategorySelected: (cat) => setState(() => _selectedSection = cat),
+       );
     } else if (_selectedSection == 'Notes') {
        content = const NotesListTab();
     } else if (_selectedSection == 'Settings') {

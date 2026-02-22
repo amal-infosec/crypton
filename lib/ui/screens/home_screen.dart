@@ -97,7 +97,8 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
 
 class PasswordListTab extends StatefulWidget {
   final String? categoryFilter;
-  const PasswordListTab({super.key, this.categoryFilter});
+  final ValueChanged<String>? onCategorySelected;
+  const PasswordListTab({super.key, this.categoryFilter, this.onCategorySelected});
 
   @override
   State<PasswordListTab> createState() => _PasswordListTabState();
@@ -238,7 +239,11 @@ class _PasswordListTabState extends State<PasswordListTab> {
                         : allPasswords.where((p) => p.category == name).length;
 
                     return _buildDesktopCategoryCard(context, cat, count, () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryDetailScreen(category: name)));
+                        if (widget.onCategorySelected != null) {
+                          widget.onCategorySelected!(name);
+                        } else {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryDetailScreen(category: name)));
+                        }
                     });
                   },
                   childCount: _categoryData.length,
