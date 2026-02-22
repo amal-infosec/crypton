@@ -27,7 +27,24 @@ class _AddEditPasswordScreenState extends State<AddEditPasswordScreen> {
   String _category = 'General';
   bool _isObscure = true;
 
-  final List<String> _categories = ['General', 'Social', 'Email', 'Finance', 'Work', 'Wifi', 'Shopping', 'Other'];
+  final List<String> _categories = [
+    'General',
+    'Social',
+    'Email',
+    'Finance',
+    'Work',
+    'Wifi',
+    'Shopping',
+    'Developer',
+    'Forum',
+    'Software',
+    'Streaming',
+    'YouTube',
+    'Cybersecurity',
+    'Personal',
+    'Banking',
+    'Other'
+  ];
 
   @override
   void initState() {

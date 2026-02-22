@@ -22,13 +22,20 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
   String _selectedSettingsTab = 'General';
 
   final List<CategoryItem> _vaultCategories = [
-    CategoryItem(name: 'Personal', icon: Icons.person_outline, color: const Color(0xFFEC407A)),
+    CategoryItem(name: 'Personal', icon: Icons.person_pin_outlined, color: Colors.orangeAccent),
     CategoryItem(name: 'Work', icon: Icons.work_outline, color: const Color(0xFF5C6BC0)),
     CategoryItem(name: 'Social', icon: Icons.people_outline, color: const Color(0xFF42A5F5)),
     CategoryItem(name: 'Email', icon: Icons.email_outlined, color: const Color(0xFFEF5350)),
     CategoryItem(name: 'Finance', icon: Icons.account_balance_wallet_outlined, color: const Color(0xFF66BB6A)),
     CategoryItem(name: 'Wifi', icon: Icons.wifi, color: const Color(0xFFFFA726)),
     CategoryItem(name: 'Shopping', icon: Icons.shopping_cart, color: const Color(0xFFAB47BC)),
+    CategoryItem(name: 'Developer', icon: Icons.code, color: Colors.tealAccent),
+    CategoryItem(name: 'Forum', icon: Icons.forum_outlined, color: Colors.lightBlueAccent),
+    CategoryItem(name: 'Software', icon: Icons.terminal, color: Colors.indigoAccent),
+    CategoryItem(name: 'Streaming', icon: Icons.movie_filter_outlined, color: Colors.pinkAccent),
+    CategoryItem(name: 'YouTube', icon: Icons.play_circle_outline, color: Colors.redAccent),
+    CategoryItem(name: 'Cybersecurity', icon: Icons.security_rounded, color: Colors.lightGreenAccent),
+    CategoryItem(name: 'Banking', icon: Icons.account_balance, color: Colors.amberAccent),
     CategoryItem(name: 'Other', icon: Icons.category_outlined, color: const Color(0xFFBDBDBD)),
   ];
 

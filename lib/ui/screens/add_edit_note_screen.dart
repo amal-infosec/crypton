@@ -22,7 +22,19 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
   late TextEditingController _contentController;
   String _category = 'Personal';
 
-  final List<String> _categories = ['Personal', 'Work', 'Ideas', 'Secret'];
+  final List<String> _categories = [
+    'Personal',
+    'Work',
+    'Ideas',
+    'Developer',
+    'Forum',
+    'Software',
+    'Streaming',
+    'YouTube',
+    'Cybersecurity',
+    'Banking',
+    'Secret'
+  ];
 
   @override
   void initState() {

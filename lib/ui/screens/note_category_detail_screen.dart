@@ -16,22 +16,36 @@ class _NoteCategoryDetailScreenState extends State<NoteCategoryDetailScreen> {
 
   IconData _getIconForCategory(String c) {
     switch (c) {
-      case 'Personal': return Icons.person_outline;
+      case 'Personal': return Icons.person_pin_outlined; // Match updated icon
       case 'Work': return Icons.work_outline;
       case 'Ideas': return Icons.lightbulb_outline;
       case 'Secret': return Icons.security;
       case 'All': return Icons.description;
+      case 'Developer': return Icons.code;
+      case 'Forum': return Icons.forum_outlined;
+      case 'Software': return Icons.terminal;
+      case 'Streaming': return Icons.movie_filter_outlined;
+      case 'YouTube': return Icons.play_circle_outline;
+      case 'Cybersecurity': return Icons.security_rounded;
+      case 'Banking': return Icons.account_balance;
       default: return Icons.note_outlined;
     }
   }
 
   Color _getColorForCategory(String c) {
     switch (c) {
-      case 'Personal': return const Color(0xFFEC407A);
+      case 'Personal': return Colors.orangeAccent;
       case 'Work': return const Color(0xFF5C6BC0);
       case 'Ideas': return const Color(0xFFFFCA28);
       case 'Secret': return const Color(0xFF78909C);
       case 'All': return const Color(0xFF81D4FA);
+      case 'Developer': return Colors.tealAccent;
+      case 'Forum': return Colors.lightBlueAccent;
+      case 'Software': return Colors.indigoAccent;
+      case 'Streaming': return Colors.pinkAccent;
+      case 'YouTube': return Colors.redAccent;
+      case 'Cybersecurity': return Colors.lightGreenAccent;
+      case 'Banking': return Colors.amberAccent;
       default: return Colors.tealAccent;
     }
   }
@@ -293,135 +307,200 @@ class _NoteCategoryDetailScreenState extends State<NoteCategoryDetailScreen> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ─── LEFT PANEL ───
-                SizedBox(
-                  width: 200,
-                  child: _buildGlassPanel(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 64, height: 64,
-                          decoration: BoxDecoration(
-                            color: catColor.withOpacity(0.15), shape: BoxShape.circle,
-                            border: Border.all(color: catColor.withOpacity(0.4), width: 1.5),
-                            boxShadow: [BoxShadow(color: catColor.withOpacity(0.3), blurRadius: 20)],
-                          ),
-                          child: Icon(catIcon, color: catColor, size: 30),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(widget.category, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17), textAlign: TextAlign.center),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(color: catColor.withOpacity(0.15), borderRadius: BorderRadius.circular(20)),
-                          child: Text('${list.length} ${list.length == 1 ? 'note' : 'notes'}',
-                            style: TextStyle(color: catColor, fontSize: 13, fontWeight: FontWeight.w600)),
-                        ),
-                        const SizedBox(height: 24),
-                        const Divider(color: Colors.white12),
-                        const SizedBox(height: 12),
-                        Align(alignment: Alignment.centerLeft,
-                          child: Text('NOTES', style: TextStyle(color: Colors.white38, fontSize: 11, letterSpacing: 1.5))),
-                        const SizedBox(height: 8),
-                        _infoRow(Icons.lock_outline, 'Private & Secure'),
-                        const SizedBox(height: 8),
-                        _infoRow(Icons.touch_app_outlined, 'Click to open note'),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditNoteScreen())),
-                            icon: const Icon(Icons.add, size: 16),
-                            label: const Text('New Note', style: TextStyle(fontSize: 13)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: catColor.withOpacity(0.3), foregroundColor: Colors.white, elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < 800;
+              
+              if (isMobile) {
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: _buildGlassPanel(
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 50, height: 50,
+                              decoration: BoxDecoration(
+                                color: catColor.withOpacity(0.15), shape: BoxShape.circle,
+                                border: Border.all(color: catColor.withOpacity(0.4), width: 1),
+                              ),
+                              child: Icon(catIcon, color: catColor, size: 24),
                             ),
-                          ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(widget.category, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                                  Text('${list.length} items', style: TextStyle(color: catColor.withOpacity(0.7), fontSize: 13)),
+                                ],
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditNoteScreen())),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: catColor.withOpacity(0.3),
+                                shape: const CircleBorder(),
+                                padding: const EdgeInsets.all(12),
+                              ),
+                              child: const Icon(Icons.add, color: Colors.white),
+                            ),
+                          ],
                         ),
-                        const Spacer(),
-                        _buildDecoBottomTip('Notes are encrypted\non your device', Icons.phone_android, catColor),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-
-                // ─── CENTER LIST ───
-                Expanded(
-                  child: list.isEmpty
-                      ? _buildGlassPanel(
-                          child: Center(
-                            child: Column(mainAxisSize: MainAxisSize.min, children: [
-                              Icon(catIcon, size: 48, color: catColor.withOpacity(0.5)),
-                              const SizedBox(height: 16),
-                              Text('No ${widget.category} notes', style: const TextStyle(color: Colors.white54, fontSize: 16)),
-                              const SizedBox(height: 8),
-                              const Text('Tap "New Note" to get started', style: TextStyle(color: Colors.white30, fontSize: 13)),
-                            ]),
-                          ))
-                      : ScrollConfiguration(
-                          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                          child: ListView.builder(
-                            padding: EdgeInsets.zero,
-                            physics: const BouncingScrollPhysics(),
+                    Expanded(
+                      child: list.isEmpty
+                        ? Center(child: Text('No notes in ${widget.category}', style: const TextStyle(color: Colors.white54)))
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                             itemCount: list.length,
                             itemBuilder: (context, index) {
-                              final note = list[index];
                               return _NoteTile(
-                                note: note,
+                                note: list[index],
                                 catColor: catColor,
                                 getIcon: _getIconForCategory,
-                                onTap: () => _showNotePopup(context, note, catColor),
+                                onTap: () => _showNotePopup(context, list[index], catColor),
                               );
                             },
                           ),
-                        ),
-                ),
-                const SizedBox(width: 16),
-
-                // ─── RIGHT PANEL ───
-                SizedBox(
-                  width: 200,
-                  child: _buildGlassPanel(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 24),
-                        ShaderMask(
-                          shaderCallback: (bounds) => LinearGradient(
-                            colors: [catColor.withOpacity(0.7), Colors.purple.withOpacity(0.4)],
-                          ).createShader(bounds),
-                          child: Icon(Icons.touch_app_outlined, size: 48, color: Colors.white),
-                        ),
-                        const SizedBox(height: 20),
-                        const Text('Click any note', style: TextStyle(color: Colors.white70, fontSize: 15, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
-                        const SizedBox(height: 8),
-                        const Text('A preview will open\nas a smooth popup',
-                          style: TextStyle(color: Colors.white38, fontSize: 12, height: 1.5), textAlign: TextAlign.center),
-                        const SizedBox(height: 24),
-                        const Divider(color: Colors.white12),
-                        const SizedBox(height: 16),
-                        _buildInfoTip(Icons.lock_outline, 'Encrypted content', catColor),
-                        const SizedBox(height: 10),
-                        _buildInfoTip(Icons.edit_note, 'Edit inside popup', catColor),
-                        const SizedBox(height: 10),
-                        _buildInfoTip(Icons.add_circle_outline, 'Add via left panel', catColor),
-                        const Spacer(),
-                        _buildDecoBottomTip('Secure & private\nnotes vault', Icons.note_alt_outlined, catColor),
-                      ],
                     ),
-                  ),
+                  ],
+                );
+              }
+
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // ─── LEFT PANEL ───
+                    SizedBox(
+                      width: 200,
+                      child: _buildGlassPanel(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 64, height: 64,
+                              decoration: BoxDecoration(
+                                color: catColor.withOpacity(0.15), shape: BoxShape.circle,
+                                border: Border.all(color: catColor.withOpacity(0.4), width: 1.5),
+                                boxShadow: [BoxShadow(color: catColor.withOpacity(0.3), blurRadius: 20)],
+                              ),
+                              child: Icon(catIcon, color: catColor, size: 30),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(widget.category, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17), textAlign: TextAlign.center),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(color: catColor.withOpacity(0.15), borderRadius: BorderRadius.circular(20)),
+                              child: Text('${list.length} ${list.length == 1 ? 'note' : 'notes'}',
+                                style: TextStyle(color: catColor, fontSize: 13, fontWeight: FontWeight.w600)),
+                            ),
+                            const SizedBox(height: 24),
+                            const Divider(color: Colors.white12),
+                            const SizedBox(height: 12),
+                            Align(alignment: Alignment.centerLeft,
+                              child: Text('NOTES', style: TextStyle(color: Colors.white38, fontSize: 11, letterSpacing: 1.5))),
+                            const SizedBox(height: 8),
+                            _infoRow(Icons.lock_outline, 'Private & Secure'),
+                            const SizedBox(height: 8),
+                            _infoRow(Icons.touch_app_outlined, 'Click to open note'),
+                            const SizedBox(height: 24),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditNoteScreen())),
+                                icon: const Icon(Icons.add, size: 16),
+                                label: const Text('New Note', style: TextStyle(fontSize: 13)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: catColor.withOpacity(0.3), foregroundColor: Colors.white, elevation: 0,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            _buildDecoBottomTip('Notes are encrypted\non your device', Icons.phone_android, catColor),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+
+                    // ─── CENTER LIST ───
+                    Expanded(
+                      child: list.isEmpty
+                          ? _buildGlassPanel(
+                              child: Center(
+                                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                  Icon(catIcon, size: 48, color: catColor.withOpacity(0.5)),
+                                  const SizedBox(height: 16),
+                                  Text('No ${widget.category} notes', style: const TextStyle(color: Colors.white54, fontSize: 16)),
+                                  const SizedBox(height: 8),
+                                  const Text('Tap "New Note" to get started', style: TextStyle(color: Colors.white30, fontSize: 13)),
+                                ]),
+                              ))
+                          : ScrollConfiguration(
+                              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: list.length,
+                                itemBuilder: (context, index) {
+                                  final note = list[index];
+                                  return _NoteTile(
+                                    note: note,
+                                    catColor: catColor,
+                                    getIcon: _getIconForCategory,
+                                    onTap: () => _showNotePopup(context, note, catColor),
+                                  );
+                                },
+                              ),
+                            ),
+                    ),
+                    const SizedBox(width: 16),
+
+                    // ─── RIGHT PANEL ───
+                    SizedBox(
+                      width: 200,
+                      child: _buildGlassPanel(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 24),
+                            ShaderMask(
+                              shaderCallback: (bounds) => LinearGradient(
+                                colors: [catColor.withOpacity(0.7), Colors.purple.withOpacity(0.4)],
+                              ).createShader(bounds),
+                              child: Icon(Icons.touch_app_outlined, size: 48, color: Colors.white),
+                            ),
+                            const SizedBox(height: 20),
+                            const Text('Click any note', style: TextStyle(color: Colors.white70, fontSize: 15, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+                            const SizedBox(height: 8),
+                            const Text('A preview will open\nas a smooth popup',
+                              style: TextStyle(color: Colors.white38, fontSize: 12, height: 1.5), textAlign: TextAlign.center),
+                            const SizedBox(height: 24),
+                            const Divider(color: Colors.white12),
+                            const SizedBox(height: 16),
+                            _buildInfoTip(Icons.lock_outline, 'Encrypted content', catColor),
+                            const SizedBox(height: 10),
+                            _buildInfoTip(Icons.edit_note, 'Edit inside popup', catColor),
+                            const SizedBox(height: 10),
+                            _buildInfoTip(Icons.add_circle_outline, 'Add via left panel', catColor),
+                            const Spacer(),
+                            _buildDecoBottomTip('Secure & private\nnotes vault', Icons.note_alt_outlined, catColor),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

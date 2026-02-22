@@ -108,13 +108,21 @@ class _PasswordListTabState extends State<PasswordListTab> {
   
   final List<CategoryItem> _categoryData = [
     CategoryItem(name: 'All', icon: Icons.all_inclusive, color: Colors.white),
-    CategoryItem(name: 'Social', icon: Icons.people_outline, color: Color(0xFF42A5F5)),
-    CategoryItem(name: 'Email', icon: Icons.email_outlined, color: Color(0xFFEF5350)),
-    CategoryItem(name: 'Finance', icon: Icons.account_balance_wallet_outlined, color: Color(0xFF66BB6A)),
-    CategoryItem(name: 'Work', icon: Icons.work_outline, color: Color(0xFF8D6E63)),
-    CategoryItem(name: 'Wifi', icon: Icons.wifi, color: Color(0xFFFFA726)),
-    CategoryItem(name: 'Shopping', icon: Icons.shopping_cart, color: Color(0xFFAB47BC)),
-    CategoryItem(name: 'Other', icon: Icons.category_outlined, color: Color(0xFFBDBDBD)),
+    CategoryItem(name: 'Social', icon: Icons.people_outline, color: const Color(0xFF42A5F5)),
+    CategoryItem(name: 'Email', icon: Icons.email_outlined, color: const Color(0xFFEF5350)),
+    CategoryItem(name: 'Finance', icon: Icons.account_balance_wallet_outlined, color: const Color(0xFF66BB6A)),
+    CategoryItem(name: 'Work', icon: Icons.work_outline, color: const Color(0xFF8D6E63)),
+    CategoryItem(name: 'Wifi', icon: Icons.wifi, color: const Color(0xFFFFA726)),
+    CategoryItem(name: 'Shopping', icon: Icons.shopping_cart, color: const Color(0xFFAB47BC)),
+    CategoryItem(name: 'Developer', icon: Icons.code, color: Colors.tealAccent),
+    CategoryItem(name: 'Forum', icon: Icons.forum_outlined, color: Colors.lightBlueAccent),
+    CategoryItem(name: 'Software', icon: Icons.terminal, color: Colors.indigoAccent),
+    CategoryItem(name: 'Streaming', icon: Icons.movie_filter_outlined, color: Colors.pinkAccent),
+    CategoryItem(name: 'YouTube', icon: Icons.play_circle_outline, color: Colors.redAccent),
+    CategoryItem(name: 'Cybersecurity', icon: Icons.security_rounded, color: Colors.lightGreenAccent),
+    CategoryItem(name: 'Personal', icon: Icons.person_pin_outlined, color: Colors.orangeAccent),
+    CategoryItem(name: 'Banking', icon: Icons.account_balance, color: Colors.amberAccent),
+    CategoryItem(name: 'Other', icon: Icons.category_outlined, color: const Color(0xFFBDBDBD)),
   ];
 
   @override
@@ -320,10 +328,17 @@ class _NotesListTabState extends State<NotesListTab> {
   
   final List<CategoryItem> _noteCategories = [
     CategoryItem(name: 'All', icon: Icons.description, color: Colors.white),
-    CategoryItem(name: 'Personal', icon: Icons.person_outline, color: Color(0xFFEC407A)),
-    CategoryItem(name: 'Work', icon: Icons.work_outline, color: Color(0xFF5C6BC0)),
-    CategoryItem(name: 'Ideas', icon: Icons.lightbulb_outline, color: Color(0xFFFFCA28)),
-    CategoryItem(name: 'Secret', icon: Icons.security, color: Color(0xFF78909C)),
+    CategoryItem(name: 'Personal', icon: Icons.person_pin_outlined, color: Colors.orangeAccent),
+    CategoryItem(name: 'Work', icon: Icons.work_outline, color: const Color(0xFF5C6BC0)),
+    CategoryItem(name: 'Ideas', icon: Icons.lightbulb_outline, color: const Color(0xFFFFCA28)),
+    CategoryItem(name: 'Developer', icon: Icons.code, color: Colors.tealAccent),
+    CategoryItem(name: 'Forum', icon: Icons.forum_outlined, color: Colors.lightBlueAccent),
+    CategoryItem(name: 'Software', icon: Icons.terminal, color: Colors.indigoAccent),
+    CategoryItem(name: 'Streaming', icon: Icons.movie_filter_outlined, color: Colors.pinkAccent),
+    CategoryItem(name: 'YouTube', icon: Icons.play_circle_outline, color: Colors.redAccent),
+    CategoryItem(name: 'Cybersecurity', icon: Icons.security_rounded, color: Colors.lightGreenAccent),
+    CategoryItem(name: 'Banking', icon: Icons.account_balance, color: Colors.amberAccent),
+    CategoryItem(name: 'Secret', icon: Icons.security, color: const Color(0xFF78909C)),
   ];
 
   @override
@@ -437,12 +452,21 @@ class _NotesListTabState extends State<NotesListTab> {
   }
 
   Widget _buildNoteTile(BuildContext context, dynamic note) {
+      final IconData catIcon = _noteCategories.firstWhere(
+        (c) => c.name == note.category, 
+        orElse: () => CategoryItem(name: 'Other', icon: Icons.note_outlined, color: Colors.tealAccent)
+      ).icon;
+
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: ListTile(
            contentPadding: const EdgeInsets.all(16),
-           title: Text(note.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-           subtitle: Text(note.category),
+           leading: CircleAvatar(
+             backgroundColor: Colors.white.withOpacity(0.05),
+             child: Icon(catIcon, color: Colors.tealAccent.withOpacity(0.7), size: 18),
+           ),
+           title: Text(note.title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+           subtitle: Text(note.category, style: const TextStyle(color: Colors.white54)),
            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditNoteScreen(note: note))),
         ),
       );
