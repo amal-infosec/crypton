@@ -40,8 +40,9 @@ This method is optimized for **Hyprland/Wayland** and sets up your app launcher 
 3. **Launch**: Search for **"Crypton"** in your launcher (`wofi`, `rofi`, `tofi`, etc.).
 
 #### 🛠️ Manual Install
-1. **Prerequisites**: `sudo pacman -S --needed gtk3 libsecret xdg-desktop-portal-gtk`
-2. **Setup**:
+1. **Prerequisites (Arch Linux)**: `sudo pacman -S --needed gtk3 libsecret xdg-desktop-portal-gtk alsa-lib libasound`
+2. **Prerequisites (Debian/Ubuntu)**: `sudo apt-get install libgtk-3-dev libsecret-1-dev libasound2-dev`
+3. **Setup**:
    - Extract the binary bundle to a permanent folder.
    - Make the binary executable: `chmod +x crypton`
 3. **Wayland Support**: To run natively on Wayland, use:
@@ -55,10 +56,10 @@ This method is optimized for **Hyprland/Wayland** and sets up your app launcher 
 
 ## 🛠️ Development
 
-### Prerequisites
-- Flutter SDK (3.10.7 or later)
-- Visual Studio (for Windows builds)
-- Clang/C++ tools (for Linux builds)
+### Build Prerequisites (Linux)
+To build the Linux version, you must install the following development packages:
+- **Arch Linux**: `sudo pacman -S --needed base-devel cmake pkg-config gtk3 libsecret alsa-lib`
+- **Debian/Ubuntu**: `sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev libsecret-1-dev libasound2-dev`
 
 ### Build Commands
 - **Android Release (APK)**: `flutter build apk --release`

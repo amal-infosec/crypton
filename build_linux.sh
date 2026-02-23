@@ -9,11 +9,11 @@ echo "🛡️  Starting Crypton Linux Build..."
 # 1. Detect OS and Install Dependencies
 if [ -f /etc/arch-release ]; then
     echo "📦 Detected Arch Linux. Installing dependencies..."
-    sudo pacman -Sy --needed --noconfirm clang cmake ninja pkg-config gtk3 xz libsecret jsoncpp zip
+    sudo pacman -Sy --needed --noconfirm clang cmake ninja pkg-config gtk3 xz libsecret jsoncpp zip alsa-lib
 elif [ -f /etc/debian_version ]; then
     echo "📦 Detected Debian/Ubuntu. Installing dependencies..."
     sudo apt-get update
-    sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev libjsoncpp-dev zip
+    sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev libjsoncpp-dev zip libasound2-dev
 else
     echo "⚠️  Distribution not explicitly supported for auto-dependency install."
     echo "Please ensure you have: clang, cmake, ninja, pkg-config, lzma, libsecret, and jsoncpp."
