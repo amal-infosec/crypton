@@ -7,7 +7,7 @@ class AppTheme {
 
   static ThemeData get darkTheme {
     const primaryColor = Colors.white; // Monochrome White
-    const darkSurface = Color(0xFF1C1C1E); // Apple Dark Gray
+    const darkSurface = Color(0xFF121214); // Deep charcoal/black mix
     const pureBlack = Color(0xFF000000); // OLED Black
     
     return ThemeData(

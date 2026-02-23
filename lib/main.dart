@@ -6,11 +6,13 @@ import 'package:provider/provider.dart';
 import 'core/auth_service.dart';
 import 'core/storage_service.dart';
 import 'core/encryption_service.dart';
+import 'package:media_kit/media_kit.dart';
 import 'ui/theme.dart';
 import 'ui/screens/lock_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
 
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     await windowManager.ensureInitialized();
@@ -87,8 +89,25 @@ class _XTMYEKAppState extends State<XTMYEKApp> with WidgetsBindingObserver {
         title: 'CRYPTON',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
+        scrollBehavior: const CustomScrollBehavior(),
         home: const LockScreen(),
       ),
     );
+  }
+}
+
+class CustomScrollBehavior extends MaterialScrollBehavior {
+  const CustomScrollBehavior();
+
+  @override
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+    // This removes the "GlowingOverscrollIndicator" (the yellow/white glow)
+    return child;
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    // This provides the smooth "liquid" bouncing effect on all platforms
+    return const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
   }
 }

@@ -1,4 +1,5 @@
-
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:math';
@@ -211,6 +212,8 @@ class _AddEditPasswordScreenState extends State<AddEditPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isAndroid = !kIsWeb && Platform.isAndroid;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
@@ -236,140 +239,156 @@ class _AddEditPasswordScreenState extends State<AddEditPasswordScreen> {
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFF0F0C29), Color(0xFF302B63), Color(0xFF24243E)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
           ),
         ),
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 500),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                    child: Container(
-                      padding: const EdgeInsets.all(28),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
-                        boxShadow: [
-                           BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 24, spreadRadius: 5)
-                        ]
-                      ),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _buildGlassTextField(
-                               controller: _titleController, 
-                               label: 'Title', 
-                               icon: Icons.title, 
-                               validator: (v) => v!.isEmpty ? 'Required' : null
-                            ),
-                            const SizedBox(height: 20),
-                            _buildGlassTextField(
-                               controller: _usernameController, 
-                               label: 'Username/Email', 
-                               icon: Icons.person_outline
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: _buildGlassTextField(
-                                    controller: _passwordController,
-                                    label: 'Password',
-                                    icon: Icons.key,
-                                    isObscure: _isObscure,
-                                    suffixIcon: IconButton(
-                                      icon: Icon(_isObscure ? Icons.visibility : Icons.visibility_off, color: Colors.white70),
-                                      onPressed: () => setState(() => _isObscure = !_isObscure),
-                                    ),
-                                    validator: (v) => v!.isEmpty ? 'Required' : null,
-                                  ),
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isAndroid ? 20 : 24, 
+                    vertical: isAndroid ? 10 : 16
+                  ),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: isAndroid ? double.infinity : 500),
+                      child: isAndroid 
+                        ? Form(key: _formKey, child: _buildFormFields())
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                              child: Container(
+                                padding: const EdgeInsets.all(28),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+                                  boxShadow: [
+                                     BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 24, spreadRadius: 5)
+                                  ]
                                 ),
-                                const SizedBox(width: 12),
-                                Container(
-                                  height: 56,
-                                  width: 56,
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(colors: [Color(0xFF00C9FF), Color(0xFF92FE9D)]),
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [BoxShadow(color: const Color(0xFF00C9FF).withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4))],
-                                  ),
-                                  child: IconButton(
-                                    onPressed: _generatePassword,
-                                    icon: const Icon(Icons.refresh, color: Colors.black87),
-                                    tooltip: 'Generate Password',
-                                  ),
+                                child: Form(
+                                  key: _formKey,
+                                  child: _buildFormFields(),
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                             _buildGlassTextField(
-                               controller: _urlController, 
-                               label: 'Website URL', 
-                               icon: Icons.link,
-                               keyboardType: TextInputType.url
-                            ),
-                            const SizedBox(height: 20),
-                            DropdownButtonFormField<String>(
-                              value: _category,
-                              dropdownColor: const Color(0xFF1E1E24).withOpacity(0.9),
-                              style: const TextStyle(color: Colors.white),
-                              decoration: InputDecoration(
-                                labelText: 'Category',
-                                labelStyle: const TextStyle(color: Colors.white70),
-                                prefixIcon: const Icon(Icons.category, color: Colors.white70),
-                                filled: true,
-                                fillColor: Colors.white.withOpacity(0.05),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
-                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
-                                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.tealAccent.withOpacity(0.5))),
-                              ),
-                              items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                              onChanged: (v) => setState(() => _category = v!),
-                            ),
-                            const SizedBox(height: 20),
-                            _buildGlassTextField(
-                               controller: _notesController, 
-                               label: 'Notes', 
-                               icon: Icons.note, 
-                               maxLines: 4
-                            ),
-                            const SizedBox(height: 24),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white.withOpacity(0.1),
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                ),
-                                onPressed: _save,
-                                child: const Text('Save Password', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
                               ),
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFormFields() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildGlassTextField(
+           controller: _titleController, 
+           label: 'Title', 
+           icon: Icons.title, 
+           validator: (v) => v!.isEmpty ? 'Required' : null
+        ),
+        const SizedBox(height: 20),
+        _buildGlassTextField(
+           controller: _usernameController, 
+           label: 'Username/Email', 
+           icon: Icons.person_outline
+        ),
+        const SizedBox(height: 20),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _buildGlassTextField(
+                controller: _passwordController,
+                label: 'Password',
+                icon: Icons.key,
+                isObscure: _isObscure,
+                suffixIcon: IconButton(
+                  icon: Icon(_isObscure ? Icons.visibility : Icons.visibility_off, color: Colors.white70),
+                  onPressed: () => setState(() => _isObscure = !_isObscure),
+                ),
+                validator: (v) => v!.isEmpty ? 'Required' : null,
+                keyboardType: (!kIsWeb && Platform.isAndroid) ? TextInputType.number : null,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              height: 56,
+              width: 56,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFF00C9FF), Color(0xFF92FE9D)]),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [BoxShadow(color: const Color(0xFF00C9FF).withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4))],
+              ),
+              child: IconButton(
+                onPressed: _generatePassword,
+                icon: const Icon(Icons.refresh, color: Colors.black87),
+                tooltip: 'Generate Password',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+         _buildGlassTextField(
+           controller: _urlController, 
+           label: 'Website URL', 
+           icon: Icons.link,
+           keyboardType: TextInputType.url
+        ),
+        const SizedBox(height: 20),
+        DropdownButtonFormField<String>(
+          value: _category,
+          dropdownColor: const Color(0xFF1E1E24).withOpacity(0.9),
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            labelText: 'Category',
+            labelStyle: const TextStyle(color: Colors.white70),
+            prefixIcon: const Icon(Icons.category, color: Colors.white70),
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.05),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.tealAccent.withOpacity(0.5))),
+          ),
+          items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+          onChanged: (v) => setState(() => _category = v!),
+        ),
+        const SizedBox(height: 20),
+        _buildGlassTextField(
+           controller: _notesController, 
+           label: 'Notes', 
+           icon: Icons.note, 
+           maxLines: 4
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white.withOpacity(0.1),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            onPressed: _save,
+            child: const Text('Save Password', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+          ),
+        ),
+      ],
     );
   }
 

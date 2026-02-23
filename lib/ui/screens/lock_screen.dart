@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -337,6 +339,7 @@ class _LockScreenState extends State<LockScreen> {
                               obscureText: _obscureText,
                               autofocus: true,
                               onSubmitted: (_) => _submitPassword(),
+                              keyboardType: (!kIsWeb && Platform.isAndroid) ? TextInputType.number : TextInputType.text,
                               style: GoogleFonts.outfit(
                                 fontSize: 20,
                                 letterSpacing: 2,

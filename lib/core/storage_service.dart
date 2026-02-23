@@ -1,15 +1,22 @@
-
+import 'dart:io';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import '../models/data_models.dart';
 
 class StorageService extends ChangeNotifier {
   late Box<PasswordEntry> _passwordBox;
   late Box<SecureNote> _noteBox;
+  late Box<SecureMedia> _mediaBox;
   bool _isInitialized = false;
   bool _isFakeMode = false;
+  bool _isStealthUnlocked = false;
+  bool _isMediaUnlocked = false;
 
   bool get isFakeMode => _isFakeMode;
+  bool get isStealthUnlocked => _isStealthUnlocked;
+  bool get isMediaUnlocked => _isMediaUnlocked;
 
   /// Initialize Hive and open boxes with the provided encryption key
   Future<void> init(List<int> encryptionKey, {bool isFakeMode = false}) async {
@@ -20,6 +27,7 @@ class StorageService extends ChangeNotifier {
     // Register Adapters
     if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(PasswordEntryAdapter());
     if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(SecureNoteAdapter());
+    if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(SecureMediaAdapter());
 
     _isFakeMode = isFakeMode;
     final boxPrefix = isFakeMode ? 'fake_' : '';
@@ -31,6 +39,11 @@ class StorageService extends ChangeNotifier {
 
     _noteBox = await Hive.openBox<SecureNote>(
       '${boxPrefix}notes',
+      encryptionCipher: HiveAesCipher(encryptionKey),
+    );
+
+    _mediaBox = await Hive.openBox<SecureMedia>(
+      '${boxPrefix}media',
       encryptionCipher: HiveAesCipher(encryptionKey),
     );
 
@@ -94,13 +107,14 @@ class StorageService extends ChangeNotifier {
   Future<void> close() async {
     await _passwordBox.close();
     await _noteBox.close();
+    await _mediaBox.close();
     _isInitialized = false;
   }
   
   Future<void> clearAll() async {
      await _passwordBox.clear();
-     await _passwordBox.clear();
      await _noteBox.clear();
+     await _mediaBox.clear();
      notifyListeners();
   }
 
@@ -136,6 +150,53 @@ class StorageService extends ChangeNotifier {
 
   Future<void> addAllPasswords(List<PasswordEntry> entries) async {
     await _passwordBox.addAll(entries);
+    notifyListeners();
+  }
+
+  // --- Media Methods ---
+
+  List<SecureMedia> getMedia() {
+    final all = _mediaBox.values.toList();
+    if (_isStealthUnlocked) return all;
+    return all.where((m) => !m.isStealth).toList();
+  }
+
+  Future<void> saveMedia(SecureMedia media) async {
+    if (media.isInBox) {
+      await media.save();
+    } else {
+      await _mediaBox.add(media);
+    }
+    notifyListeners();
+  }
+
+  Future<void> deleteMedia(SecureMedia media) async {
+    try {
+      // 1. Delete physical file
+      final appDocDir = await getApplicationDocumentsDirectory();
+      final filePath = p.join(appDocDir.path, '.vault', media.fileName);
+      final file = File(filePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      debugPrint('Error deleting physical media file: $e');
+    }
+
+    // 2. Delete from Hive
+    await media.delete();
+    notifyListeners();
+  }
+
+  // --- Stealth Methods ---
+
+  void setStealthUnlocked(bool unlocked) {
+    _isStealthUnlocked = unlocked;
+    notifyListeners();
+  }
+
+  void setMediaUnlocked(bool unlocked) {
+    _isMediaUnlocked = unlocked;
     notifyListeners();
   }
 }

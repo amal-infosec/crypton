@@ -16,16 +16,29 @@ import '../../core/auth_service.dart';
 import '../screens/lock_screen.dart';
 import '../../core/import_service.dart';
 import '../../models/data_models.dart';
+import '../widgets/linux_import_fallback.dart';
 
 class SettingsTab extends StatefulWidget {
-  final String activeTab;
-  const SettingsTab({super.key, this.activeTab = 'General'});
+  final String? activeTab;
+  final ValueChanged<String>? onTabChanged;
+  const SettingsTab({super.key, this.activeTab, this.onTabChanged});
 
   @override
   State<SettingsTab> createState() => _SettingsTabState();
 }
 
 class _SettingsTabState extends State<SettingsTab> {
+  String? _internalTab;
+
+  String get _currentTab => widget.activeTab ?? _internalTab ?? 'General';
+
+  void _switchTab(String tab) {
+    if (widget.onTabChanged != null) {
+      widget.onTabChanged!(tab);
+    } else {
+      setState(() => _internalTab = tab);
+    }
+  }
 
   // ─────────────── Backup helpers ───────────────
 
@@ -101,7 +114,7 @@ class _SettingsTabState extends State<SettingsTab> {
       } catch (e) {
         // Portal error on Linux usually
         if (!kIsWeb && Platform.isLinux) {
-          final fallbackPath = await _showLinuxImportFallback(context, ['.xtm']);
+          final fallbackPath = await showLinuxImportFallback(context, ['.xtm']);
           if (fallbackPath != null) {
             result = FilePickerResult([PlatformFile(path: fallbackPath, name: fallbackPath.split('/').last, size: File(fallbackPath).lengthSync())]);
           } else {
@@ -159,7 +172,7 @@ class _SettingsTabState extends State<SettingsTab> {
         );
       } catch (e) {
         if (!kIsWeb && Platform.isLinux) {
-          final fallbackPath = await _showLinuxImportFallback(context, extensions.map((e) => '.$e').toList());
+          final fallbackPath = await showLinuxImportFallback(context, extensions.map((e) => '.$e').toList());
           if (fallbackPath != null) {
              result = FilePickerResult([PlatformFile(path: fallbackPath, name: fallbackPath.split('/').last, size: File(fallbackPath).lengthSync())]);
           } else {
@@ -210,102 +223,7 @@ class _SettingsTabState extends State<SettingsTab> {
     }
   }
 
-  Future<String?> _showLinuxImportFallback(BuildContext context, List<String> extensions) async {
-    String? manualPath;
-    List<File> downloadsFiles = [];
-    
-    try {
-      final downloadsDir = await getDownloadsDirectory();
-      if (downloadsDir != null) {
-        downloadsFiles = downloadsDir.listSync()
-          .whereType<File>()
-          .where((f) => extensions.any((ext) => f.path.toLowerCase().endsWith(ext)))
-          .toList();
-        // Sort by modification date (newest first)
-        downloadsFiles.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
-      }
-    } catch (_) {}
-
-    if (!context.mounted) return null;
-
-    return showDialog<String>(
-      context: context,
-      builder: (ctx) => _GlassDialog(
-        title: '📂 Linux Import Fallback',
-        icon: Icons.folder_open,
-        iconColor: Colors.tealAccent,
-        children: [
-          const Text(
-            'System file picker failed. This usually happens if xdg-desktop-portal is missing or misconfigured.',
-            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
-          ),
-          const SizedBox(height: 16),
-          if (downloadsFiles.isNotEmpty) ...[
-            const Text('Recent matching files in Downloads:', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-            const SizedBox(height: 8),
-            Container(
-              constraints: const BoxConstraints(maxHeight: 180),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white10),
-              ),
-              child: ListView.separated(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(4),
-                itemCount: downloadsFiles.length > 5 ? 5 : downloadsFiles.length,
-                separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 1),
-                itemBuilder: (context, i) {
-                  final file = downloadsFiles[i];
-                  final name = file.path.split('/').last;
-                  return ListTile(
-                    dense: true,
-                    visualDensity: VisualDensity.compact,
-                    title: Text(name, style: const TextStyle(color: Colors.white, fontSize: 12), overflow: TextOverflow.ellipsis),
-                    subtitle: Text(DateFormat('MMM dd, HH:mm').format(file.lastModifiedSync()), style: const TextStyle(color: Colors.white38, fontSize: 10)),
-                    trailing: const Icon(Icons.chevron_right, color: Colors.white24, size: 16),
-                    onTap: () => Navigator.pop(ctx, file.path),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-          const Text('Or Enter Manual Absolute Path:', style: TextStyle(color: Colors.white54, fontSize: 12)),
-          const SizedBox(height: 8),
-          TextField(
-            autofocus: downloadsFiles.isEmpty,
-            style: const TextStyle(color: Colors.white, fontSize: 13),
-            decoration: InputDecoration(
-              hintText: '/home/user/Downloads/backup.xtm',
-              hintStyle: const TextStyle(color: Colors.white24),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white24)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white24)),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.tealAccent)),
-            ),
-            onChanged: (v) => manualPath = v,
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '💡 Tip: Install xdg-desktop-portal-gtk or xdg-desktop-portal-kde to fix this permanently.',
-            style: TextStyle(color: Colors.tealAccent, fontSize: 10),
-          ),
-        ],
-        actions: [
-          _dialogBtn('Cancel', () => Navigator.pop(ctx), outline: true),
-          _dialogBtn('Import Path', () {
-            if (manualPath != null && manualPath!.isNotEmpty) {
-              if (File(manualPath!).existsSync()) {
-                Navigator.pop(ctx, manualPath);
-              } else {
-                ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('File not found at specified path')));
-              }
-            }
-          }, color: Colors.tealAccent.withOpacity(0.3)),
-        ],
-      ),
-    );
-  }
+  // Removed local _showLinuxImportFallback as it is now shared
 
   Future<String?> _promptBackupPassword(BuildContext context, String title, {required bool isNew}) async {
     String? password;
@@ -737,7 +655,8 @@ class _SettingsTabState extends State<SettingsTab> {
 
   @override
   Widget build(BuildContext context) {
-    switch (widget.activeTab) {
+    final tab = _currentTab;
+    switch (tab) {
       case 'Security': return _buildSecurityTab(context);
       case 'Import':   return _buildImportTab(context);
       case 'Export':   return _buildExportTab(context);
@@ -749,10 +668,29 @@ class _SettingsTabState extends State<SettingsTab> {
   // ─────────────── General Tab ───────────────
 
   Widget _buildGeneralTab(BuildContext context) {
+    final isDesktop = Platform.isWindows || Platform.isLinux;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        if (!isDesktop) ...[
+          const SizedBox(height: 50),
+          const Center(child: Text('Settings', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold))),
+          const SizedBox(height: 15),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40),
+            child: Divider(color: Colors.white12),
+          ),
+          const SizedBox(height: 30),
+        ],
         const SizedBox(height: 8),
+        _sectionLabel('VAULT MANAGEMENT'),
+        const SizedBox(height: 10),
+        _glassTile(icon: Icons.upload_file, label: 'Import Vault', sub: 'Import passwords from other managers',
+            color: Colors.tealAccent, onTap: () => _switchTab('Import')),
+        const SizedBox(height: 10),
+        _glassTile(icon: Icons.download, label: 'Export & Backup', sub: 'Create an encrypted backup file',
+            color: Colors.blueAccent, onTap: () => _switchTab('Export')),
+        const SizedBox(height: 20),
         _sectionLabel('ACCOUNT RECOVERY'),
         const SizedBox(height: 10),
         _glassTile(icon: Icons.help_outline, label: 'Forgot Password', sub: 'Verify current password to proceed',
@@ -769,7 +707,7 @@ class _SettingsTabState extends State<SettingsTab> {
         _sectionLabel('SUPPORT'),
         const SizedBox(height: 10),
         _glassTile(icon: Icons.help_center_outlined, label: 'Help & Guide', sub: 'How to use Crypton',
-            color: Colors.blueAccent, onTap: () => _showHelp(context)),
+            color: Colors.blueAccent, onTap: () => _switchTab('About')),
       ],
     );
   }
@@ -915,6 +853,22 @@ class _SettingsTabState extends State<SettingsTab> {
         _infoTile(icon: Icons.no_photography, label: 'Screenshot Protection',
             sub: 'Sensitive screens may block screen capture on supported platforms', color: Colors.redAccent),
         const SizedBox(height: 20),
+        _sectionLabel('STEALTH VAULT'),
+        const SizedBox(height: 10),
+        FutureBuilder<bool>(
+          future: context.read<AuthService>().hasStealthPIN(),
+          builder: (context, snapshot) {
+            final hasStealth = snapshot.data ?? false;
+            return _glassTile(
+              icon: Icons.visibility_off_outlined,
+              label: hasStealth ? 'Update Stealth Vault' : 'Setup Stealth Vault',
+              sub: 'A hidden partition accessible via the secondary PIN',
+              color: Colors.tealAccent,
+              onTap: () => _setupStealthVault(context),
+            );
+          },
+        ),
+        const SizedBox(height: 20),
         _sectionLabel('PRIVACY NOTICE'),
         const SizedBox(height: 10),
         ClipRRect(
@@ -956,7 +910,7 @@ class _SettingsTabState extends State<SettingsTab> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const SizedBox(height: 20),
+        const SizedBox(height: 140),
         // App logo & name
         Center(
           child: Column(
@@ -964,13 +918,14 @@ class _SettingsTabState extends State<SettingsTab> {
               Container(
                 width: 88, height: 88,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(22),
                   boxShadow: [
                     BoxShadow(color: const Color(0xFF7C3AED).withOpacity(0.45), blurRadius: 28, spreadRadius: 2),
                     BoxShadow(color: const Color(0xFF2DD4BF).withOpacity(0.2), blurRadius: 16),
                   ],
                 ),
-                child: ClipOval(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
                   child: Image.asset('assets/icon/icon.png', width: 88, height: 88, fit: BoxFit.cover),
                 ),
               ),
@@ -1003,6 +958,8 @@ class _SettingsTabState extends State<SettingsTab> {
               child: Column(
                 children: [
                   _aboutRow('App Name', 'Crypton'),
+                  _divider(),
+                  _aboutRow('Platform', Platform.isLinux ? 'Linux (Native)' : Platform.isWindows ? 'Windows (Desktop)' : 'Android (Mobile)'),
                   _divider(),
                   _aboutRow('Developer', 'IU_MTX'),
                   _divider(),
@@ -1100,6 +1057,53 @@ class _SettingsTabState extends State<SettingsTab> {
         ),
       ),
     );
+  }
+
+  Future<void> _setupStealthVault(BuildContext context) async {
+    String? pin;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => _GlassDialog(
+        title: '🤫 Stealth Vault Setup',
+        icon: Icons.security,
+        iconColor: Colors.tealAccent,
+        children: [
+          const Text(
+            'Create a secondary PIN. Long-press the "CRYPTON" logo on the home screen and enter this PIN to access hidden items.',
+            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            autofocus: true,
+            obscureText: true,
+            keyboardType: TextInputType.number,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              labelText: 'Secondary Stealth PIN',
+              labelStyle: const TextStyle(color: Colors.white54),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white24)),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.white24)),
+              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.tealAccent)),
+            ),
+            onChanged: (v) => pin = v,
+          ),
+        ],
+        actions: [
+          _dialogBtn('Cancel', () => Navigator.pop(ctx, false), outline: true),
+          _dialogBtn('Save PIN', () => Navigator.pop(ctx, true), color: Colors.tealAccent.withOpacity(0.3)),
+        ],
+      ),
+    );
+
+    if (confirmed == true && pin != null && pin!.isNotEmpty) {
+      if (!context.mounted) return;
+      await context.read<AuthService>().setupStealthPIN(pin!);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Stealth Vault configured successfully!')),
+      );
+      setState(() {}); 
+    }
   }
 }
 

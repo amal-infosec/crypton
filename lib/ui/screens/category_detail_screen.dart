@@ -25,6 +25,15 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
       case 'Work': return Icons.work_outline;
       case 'Wifi': return Icons.wifi;
       case 'Shopping': return Icons.shopping_cart;
+      case 'Developer': return Icons.code;
+      case 'Forum': return Icons.forum_outlined;
+      case 'Software': return Icons.terminal;
+      case 'Streaming': return Icons.movie_filter_outlined;
+      case 'YouTube': return Icons.play_circle_outline;
+      case 'Cybersecurity': return Icons.security_rounded;
+      case 'Personal': return Icons.person_pin_outlined;
+      case 'Banking': return Icons.account_balance;
+      case 'General': return Icons.category_outlined;
       case 'Other': return Icons.category_outlined;
       default: return Icons.lock_outline;
     }
@@ -39,6 +48,16 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
       case 'Wifi': return const Color(0xFFFFA726);
       case 'Shopping': return const Color(0xFFAB47BC);
       case 'All': return const Color(0xFFB388FF);
+      case 'Developer': return Colors.tealAccent;
+      case 'Forum': return Colors.lightBlueAccent;
+      case 'Software': return Colors.indigoAccent;
+      case 'Streaming': return Colors.pinkAccent;
+      case 'YouTube': return Colors.redAccent;
+      case 'Cybersecurity': return Colors.lightGreenAccent;
+      case 'Personal': return Colors.orangeAccent;
+      case 'Banking': return Colors.amberAccent;
+      case 'General': return const Color(0xFFBDBDBD);
+      case 'Other': return const Color(0xFFBDBDBD);
       default: return Colors.tealAccent;
     }
   }
@@ -399,154 +418,223 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ─── LEFT PANEL ───
-                SizedBox(
-                  width: 200,
-                  child: _buildGlassPanel(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 64, height: 64,
-                          decoration: BoxDecoration(
-                            color: catColor.withOpacity(0.15),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: catColor.withOpacity(0.4), width: 1.5),
-                            boxShadow: [BoxShadow(color: catColor.withOpacity(0.3), blurRadius: 20)],
-                          ),
-                          child: Icon(catIcon, color: catColor, size: 30),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(widget.category,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: catColor.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text('${list.length} ${list.length == 1 ? 'item' : 'items'}',
-                            style: TextStyle(color: catColor, fontSize: 13, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        const Divider(color: Colors.white12),
-                        const SizedBox(height: 12),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text('VAULT', style: TextStyle(color: Colors.white38, fontSize: 11, letterSpacing: 1.5)),
-                        ),
-                        const SizedBox(height: 8),
-                        _infoRow(Icons.shield_outlined, 'AES-256 Encrypted'),
-                        const SizedBox(height: 8),
-                        _infoRow(Icons.timer_outlined, 'Clipboard: 30s'),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () => Navigator.push(context,
-                                MaterialPageRoute(builder: (_) => const AddEditPasswordScreen())),
-                            icon: const Icon(Icons.add, size: 16),
-                            label: const Text('Add New', style: TextStyle(fontSize: 13)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: catColor.withOpacity(0.3),
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        _buildDecoBottomTip('Double-click a tile\nto view details', Icons.mouse, catColor),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < 800;
 
-                // ─── CENTER LIST ───
-                Expanded(
-                  child: list.isEmpty
-                      ? _buildGlassPanel(
-                          child: Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(catIcon, size: 48, color: catColor.withOpacity(0.5)),
-                                const SizedBox(height: 16),
-                                Text('No ${widget.category} passwords',
-                                    style: const TextStyle(color: Colors.white54, fontSize: 16)),
-                                const SizedBox(height: 8),
-                                const Text('Tap "Add New" to get started',
-                                    style: TextStyle(color: Colors.white30, fontSize: 13)),
-                              ],
+              if (isMobile) {
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: _buildGlassPanel(
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 50, height: 50,
+                              decoration: BoxDecoration(
+                                color: catColor.withOpacity(0.15), shape: BoxShape.circle,
+                                border: Border.all(color: catColor.withOpacity(0.4), width: 1),
+                              ),
+                              child: Icon(catIcon, color: catColor, size: 24),
                             ),
-                          ),
-                        )
-                      : ScrollConfiguration(
-                          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                          child: ListView.builder(
-                            padding: EdgeInsets.zero,
-                            physics: const BouncingScrollPhysics(),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(widget.category, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                                  Text('${list.length} items', style: TextStyle(color: catColor.withOpacity(0.7), fontSize: 13)),
+                                ],
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditPasswordScreen())),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: catColor.withOpacity(0.3),
+                                shape: const CircleBorder(),
+                                padding: const EdgeInsets.all(12),
+                              ),
+                              child: const Icon(Icons.add, color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: list.isEmpty
+                        ? Center(child: Text('No passwords in ${widget.category}', style: const TextStyle(color: Colors.white54)))
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                             itemCount: list.length,
                             itemBuilder: (context, index) {
                               final entry = list[index];
-                              final isSelected = _selectedEntry == entry;
                               return _PasswordTile(
                                 entry: entry,
-                                isSelected: isSelected,
+                                isSelected: false,
                                 catColor: catColor,
                                 getIcon: _getIconForCategory,
-                                // Single click → preview in right panel
-                                onTap: () => setState(() => _selectedEntry = isSelected ? null : entry),
-                                // Double click → popup
+                                onTap: () => _showPasswordPopup(context, entry, catColor),
                                 onDoubleTap: () => _showPasswordPopup(context, entry, catColor),
                                 onCopy: () => _copyPassword(context, entry),
                               );
                             },
                           ),
-                        ),
-                ),
-                const SizedBox(width: 16),
+                    ),
+                  ],
+                );
+              }
 
-                // ─── RIGHT PANEL ───
-                SizedBox(
-                  width: 200,
-                  child: _buildGlassPanel(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 280),
-                            transitionBuilder: (child, anim) => FadeTransition(
-                              opacity: CurvedAnimation(parent: anim, curve: Curves.easeOut),
-                              child: SlideTransition(
-                                position: Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero)
-                                    .animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
-                                child: child,
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // ─── LEFT PANEL ───
+                    SizedBox(
+                      width: 200,
+                      child: _buildGlassPanel(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 64, height: 64,
+                              decoration: BoxDecoration(
+                                color: catColor.withOpacity(0.15),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: catColor.withOpacity(0.4), width: 1.5),
+                                boxShadow: [BoxShadow(color: catColor.withOpacity(0.3), blurRadius: 20)],
+                              ),
+                              child: Icon(catIcon, color: catColor, size: 30),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(widget.category,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: catColor.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text('${list.length} ${list.length == 1 ? 'item' : 'items'}',
+                                style: TextStyle(color: catColor, fontSize: 13, fontWeight: FontWeight.w600),
                               ),
                             ),
-                            child: _selectedEntry == null
-                                ? _buildEmptyPreview(catColor)
-                                : _buildFilledPreview(catColor),
-                          ),
+                            const SizedBox(height: 24),
+                            const Divider(color: Colors.white12),
+                            const SizedBox(height: 12),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text('VAULT', style: TextStyle(color: Colors.white38, fontSize: 11, letterSpacing: 1.5)),
+                            ),
+                            const SizedBox(height: 8),
+                            _infoRow(Icons.shield_outlined, 'AES-256 Encrypted'),
+                            const SizedBox(height: 8),
+                            _infoRow(Icons.timer_outlined, 'Clipboard: 30s'),
+                            const SizedBox(height: 24),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () => Navigator.push(context,
+                                    MaterialPageRoute(builder: (_) => const AddEditPasswordScreen())),
+                                icon: const Icon(Icons.add, size: 16),
+                                label: const Text('Add New', style: TextStyle(fontSize: 13)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: catColor.withOpacity(0.3),
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            _buildDecoBottomTip('Double-click a tile\nto view details', Icons.mouse, catColor),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 16),
+
+                    // ─── CENTER LIST ───
+                    Expanded(
+                      child: list.isEmpty
+                          ? _buildGlassPanel(
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(catIcon, size: 48, color: catColor.withOpacity(0.5)),
+                                    const SizedBox(height: 16),
+                                    Text('No ${widget.category} passwords',
+                                        style: const TextStyle(color: Colors.white54, fontSize: 16)),
+                                    const SizedBox(height: 8),
+                                    const Text('Tap "Add New" to get started',
+                                        style: TextStyle(color: Colors.white30, fontSize: 13)),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : ScrollConfiguration(
+                              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: list.length,
+                                itemBuilder: (context, index) {
+                                  final entry = list[index];
+                                  final isSelected = _selectedEntry == entry;
+                                  return _PasswordTile(
+                                    entry: entry,
+                                    isSelected: isSelected,
+                                    catColor: catColor,
+                                    getIcon: _getIconForCategory,
+                                    // Single click → preview in right panel
+                                    onTap: () => setState(() => _selectedEntry = isSelected ? null : entry),
+                                    // Double click → popup
+                                    onDoubleTap: () => _showPasswordPopup(context, entry, catColor),
+                                    onCopy: () => _copyPassword(context, entry),
+                                  );
+                                },
+                              ),
+                            ),
+                    ),
+                    const SizedBox(width: 16),
+
+                    // ─── RIGHT PANEL ───
+                    SizedBox(
+                      width: 200,
+                      child: _buildGlassPanel(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 280),
+                                transitionBuilder: (child, anim) => FadeTransition(
+                                  opacity: CurvedAnimation(parent: anim, curve: Curves.easeOut),
+                                  child: SlideTransition(
+                                    position: Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero)
+                                        .animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+                                    child: child,
+                                  ),
+                                ),
+                                child: _selectedEntry == null
+                                    ? _buildEmptyPreview(catColor)
+                                    : _buildFilledPreview(catColor),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

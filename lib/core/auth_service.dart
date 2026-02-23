@@ -19,6 +19,11 @@ class AuthService {
   static const _kFakePinHash = 'fake_pin_hash';
   static const _kRealKeyBlob = 'real_key_blob_v1';
   static const _kFakeKeyBlob = 'fake_key_blob_v1';
+  static const _kStealthPinHash = 'stealth_pin_hash';
+  static const _kStealthKeyBlob = 'stealth_key_blob_v1';
+  static const _kMediaPinHash = 'media_pin_hash';
+  static const _kMediaKeyBlob = 'media_key_blob_v1';
+  static const _kMediaMasterKey = 'media_master_key_v1';
   static const _kUseBiometrics = 'use_biometrics';
 
   bool _isInitialized = false;
@@ -131,6 +136,61 @@ class AuthService {
     } catch (e) {
       return false;
     }
+  }
+
+  // --- Stealth Mode Methods ---
+
+  Future<void> setupStealthPIN(String pin) async {
+    final pinHash = sha256.convert(utf8.encode(pin)).toString();
+    final masterKey = _generateRandomKey();
+    final encryptedKey = EncryptionService.encryptDataWithPassword(masterKey, pin);
+    
+    await _storage.write(key: _kStealthPinHash, value: pinHash);
+    await _storage.write(key: _kStealthKeyBlob, value: base64Encode(encryptedKey));
+  }
+
+  Future<bool> hasStealthPIN() async {
+    return await _storage.read(key: _kStealthPinHash) != null;
+  }
+
+  Future<bool> authenticateStealth(String pin) async {
+    final pinHash = sha256.convert(utf8.encode(pin)).toString();
+    final storedHash = await _storage.read(key: _kStealthPinHash);
+    return pinHash == storedHash;
+  }
+
+  // --- Media PIN Methods ---
+
+  Future<void> setupMediaPIN(String pin) async {
+    final pinHash = sha256.convert(utf8.encode(pin)).toString();
+    await _storage.write(key: _kMediaPinHash, value: pinHash);
+  }
+
+  Future<bool> hasMediaPIN() async {
+    return await _storage.read(key: _kMediaPinHash) != null;
+  }
+
+  Future<bool> authenticateMedia(String pin) async {
+    final pinHash = sha256.convert(utf8.encode(pin)).toString();
+    final storedHash = await _storage.read(key: _kMediaPinHash);
+    return pinHash == storedHash;
+  }
+
+  Future<void> removeMediaPIN() async {
+    await _storage.delete(key: _kMediaPinHash);
+  }
+
+  // --- Media Logic ---
+
+  Future<Uint8List> getMediaKey() async {
+    final storedKey = await _storage.read(key: _kMediaMasterKey);
+    if (storedKey != null) {
+      return base64Decode(storedKey);
+    }
+    // Generate and store if not exists
+    final newKey = _generateRandomKey();
+    await _storage.write(key: _kMediaMasterKey, value: base64Encode(newKey));
+    return newKey;
   }
 
   // Helper

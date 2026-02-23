@@ -121,3 +121,58 @@ class SecureNote extends HiveObject {
     updatedAt: DateTime.parse(json['updatedAt']),
   );
 }
+
+@HiveType(typeId: 2)
+class SecureMedia extends HiveObject {
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
+  String title;
+
+  @HiveField(2)
+  String fileName; // The random UUID name on disk
+
+  @HiveField(3)
+  String mediaType; // 'image', 'video', 'audio'
+
+  @HiveField(4)
+  bool isStealth;
+
+  @HiveField(5)
+  DateTime createdAt;
+
+  @HiveField(6)
+  String? thumbnailPath; // For video/images if needed
+
+  SecureMedia({
+    String? id,
+    required this.title,
+    required this.fileName,
+    required this.mediaType,
+    this.isStealth = false,
+    DateTime? createdAt,
+    this.thumbnailPath,
+  }) : id = id ?? const Uuid().v4(),
+       createdAt = createdAt ?? DateTime.now();
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'fileName': fileName,
+    'mediaType': mediaType,
+    'isStealth': isStealth,
+    'createdAt': createdAt.toIso8601String(),
+    'thumbnailPath': thumbnailPath,
+  };
+
+  factory SecureMedia.fromJson(Map<String, dynamic> json) => SecureMedia(
+    id: json['id'],
+    title: json['title'],
+    fileName: json['fileName'],
+    mediaType: json['mediaType'],
+    isStealth: json['isStealth'] ?? false,
+    createdAt: DateTime.parse(json['createdAt']),
+    thumbnailPath: json['thumbnailPath'],
+  );
+}

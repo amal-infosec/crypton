@@ -112,3 +112,55 @@ class SecureNoteAdapter extends TypeAdapter<SecureNote> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class SecureMediaAdapter extends TypeAdapter<SecureMedia> {
+  @override
+  final int typeId = 2;
+
+  @override
+  SecureMedia read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return SecureMedia(
+      id: fields[0] as String?,
+      title: fields[1] as String,
+      fileName: fields[2] as String,
+      mediaType: fields[3] as String,
+      isStealth: fields[4] as bool,
+      createdAt: fields[5] as DateTime?,
+      thumbnailPath: fields[6] as String?,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, SecureMedia obj) {
+    writer
+      ..writeByte(7)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.title)
+      ..writeByte(2)
+      ..write(obj.fileName)
+      ..writeByte(3)
+      ..write(obj.mediaType)
+      ..writeByte(4)
+      ..write(obj.isStealth)
+      ..writeByte(5)
+      ..write(obj.createdAt)
+      ..writeByte(6)
+      ..write(obj.thumbnailPath);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SecureMediaAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}

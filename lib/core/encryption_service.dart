@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:io';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:crypto/crypto.dart';
 
@@ -70,5 +71,35 @@ class EncryptionService {
     final encryptedBytes = encrypt.Encrypted(data.sublist(16));
 
     return Uint8List.fromList(encrypter.decryptBytes(encryptedBytes, iv: iv));
+  }
+
+  /// Encrypts a file and saves it to a new location
+  Future<void> encryptFile(String sourcePath, String destPath, Uint8List key) async {
+    final bytes = await File(sourcePath).readAsBytes();
+    final keySpec = encrypt.Key(key);
+    final iv = encrypt.IV.fromLength(16);
+    final encrypter = encrypt.Encrypter(encrypt.AES(keySpec, mode: encrypt.AESMode.cbc));
+    
+    final encrypted = encrypter.encryptBytes(bytes, iv: iv);
+    final combined = BytesBuilder()..add(iv.bytes)..add(encrypted.bytes);
+    await File(destPath).writeAsBytes(combined.toBytes());
+  }
+
+  /// Decrypts a file as bytes (for Image.memory)
+  Future<Uint8List> decryptFileToMemory(String sourcePath, Uint8List key) async {
+    final data = await File(sourcePath).readAsBytes();
+    final keySpec = encrypt.Key(key);
+    final encrypter = encrypt.Encrypter(encrypt.AES(keySpec, mode: encrypt.AESMode.cbc));
+
+    final iv = encrypt.IV(data.sublist(0, 16));
+    final encryptedBytes = encrypt.Encrypted(data.sublist(16));
+
+    return Uint8List.fromList(encrypter.decryptBytes(encryptedBytes, iv: iv));
+  }
+
+  /// Decrypts a file to a temporary disk location (for Video players)
+  Future<void> decryptFileToDisk(String sourcePath, String destPath, Uint8List key) async {
+    final bytes = await decryptFileToMemory(sourcePath, key);
+    await File(destPath).writeAsBytes(bytes);
   }
 }

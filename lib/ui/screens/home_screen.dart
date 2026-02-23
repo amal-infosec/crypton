@@ -11,6 +11,8 @@ import 'add_edit_note_screen.dart';
 import 'category_detail_screen.dart';
 import 'note_category_detail_screen.dart';
 import 'settings_tab.dart';
+import 'media_vault_tab.dart';
+import 'stealth_auth_screen.dart';
 
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -30,21 +32,8 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class MobileHomeScreen extends StatefulWidget {
+class MobileHomeScreen extends StatelessWidget {
   const MobileHomeScreen({super.key});
-
-  @override
-  State<MobileHomeScreen> createState() => _MobileHomeScreenState();
-}
-
-class _MobileHomeScreenState extends State<MobileHomeScreen> {
-  int _currentIndex = 0;
-
-  final List<Widget> _pages = [
-    const PasswordListTab(),
-    const NotesListTab(),
-    const SettingsTab(),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -64,33 +53,97 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
             end: Alignment.bottomRight,
           ),
         ),
-        child: _pages[_currentIndex],
+        child: const _MobileHomeContent(),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (i) => setState(() => _currentIndex = i),
-        backgroundColor: isFake ? Colors.black.withOpacity(0.8) : Colors.white.withOpacity(0.05),
-        indicatorColor: isFake ? Colors.red.shade700 : Colors.tealAccent.withOpacity(0.5),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.password), label: 'Vault'),
-          NavigationDestination(icon: Icon(Icons.note), label: 'Notes'),
-          NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
-        ],
+    );
+  }
+}
+
+class _MobileHomeContent extends StatefulWidget {
+  const _MobileHomeContent();
+
+  @override
+  State<_MobileHomeContent> createState() => _MobileHomeContentState();
+}
+
+class _MobileHomeContentState extends State<_MobileHomeContent> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    const PasswordListTab(),
+    const MediaVaultTab(),
+    const NotesListTab(),
+    const SettingsTab(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(child: _pages[_currentIndex]),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: Container(
+              height: 72,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1B4B).withOpacity(0.9),
+                borderRadius: BorderRadius.circular(36),
+                border: Border.all(color: Colors.white.withOpacity(0.12), width: 1),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 8)),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(36),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildDockItem(0, Icons.shield_outlined, Icons.shield, 'Vault'),
+                      _buildDockItem(1, Icons.play_circle_outline, Icons.play_circle, 'Media'),
+                      _buildDockItem(2, Icons.description_outlined, Icons.description, 'Notes'),
+                      _buildDockItem(3, Icons.settings_outlined, Icons.settings, 'Settings'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDockItem(int index, IconData outlineIcon, IconData solidIcon, String label) {
+    final isSelected = _currentIndex == index;
+    final color = isSelected ? Colors.tealAccent : Colors.white60;
+
+    return GestureDetector(
+      onTap: () => setState(() => _currentIndex = index),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.tealAccent.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedScale(
+              scale: isSelected ? 1.2 : 1.0,
+              duration: const Duration(milliseconds: 250),
+              child: Icon(isSelected ? solidIcon : outlineIcon, color: color, size: 26),
+            ),
+            const SizedBox(height: 4),
+            Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+          ],
+        ),
       ),
-      floatingActionButton: _currentIndex == 0 || _currentIndex == 1
-          ? FloatingActionButton(
-              onPressed: () {
-                if (_currentIndex == 0) {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditPasswordScreen()));
-                } else {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditNoteScreen()));
-                }
-              },
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              child: Icon(_currentIndex == 0 ? Icons.add : Icons.note_add),
-            )
-          : null,
     );
   }
 }
@@ -133,7 +186,6 @@ class _PasswordListTabState extends State<PasswordListTab> {
     
     final isSearching = _searchQuery.isNotEmpty;
     
-    // Apply optional category filter before search
     final filteredByCategory = widget.categoryFilter != null && widget.categoryFilter != 'All Vaults'
         ? allPasswords.where((p) => p.category == widget.categoryFilter).toList()
         : allPasswords;
@@ -149,38 +201,46 @@ class _PasswordListTabState extends State<PasswordListTab> {
       backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          // Drag Header
-          DragToMoveArea(
-            child: Container(
-              height: 48,
-              color: Colors.transparent, 
-            ),
-          ),
+          DragToMoveArea(child: Container(height: (Platform.isWindows || Platform.isLinux) ? 48 : 0)),
           Expanded(
             child: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                    padding: EdgeInsets.fromLTRB(24, Platform.isAndroid ? 50 : 16, 24, 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              widget.categoryFilter ?? 'CRYPTON', 
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white)
+                            GestureDetector(
+                              onLongPress: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) => const StealthAuthScreen(),
+                                );
+                              },
+                              child: Text(
+                                widget.categoryFilter ?? 'CRYPTON', 
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900, 
+                                  fontSize: 22, 
+                                  color: Colors.white, 
+                                  letterSpacing: 3,
+                                )
+                              ),
                             ),
                             _LiquidGlassButton(
-                              label: 'Add Password',
+                              label: 'Add',
                               icon: Icons.add,
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditPasswordScreen())),
                             ),
                           ],
                         ),
                         const SizedBox(height: 24),
-                        // Dark Search Bar
                         TextField(
                           decoration: InputDecoration(
                             hintText: 'Search vault...',
@@ -203,19 +263,16 @@ class _PasswordListTabState extends State<PasswordListTab> {
           
           if (isSearching || (widget.categoryFilter != null && widget.categoryFilter != 'All Vaults'))
             SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: 220,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 1.2,
+                  childAspectRatio: 1.1,
                 ),
                 delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                     final entry = searchResults[index];
-                     return _buildDesktopPasswordCard(context, entry);
-                  },
+                  (context, index) => _buildDesktopPasswordCard(context, searchResults[index]),
                   childCount: searchResults.length,
                 ),
               ),
@@ -225,7 +282,7 @@ class _PasswordListTabState extends State<PasswordListTab> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 250,
+                  maxCrossAxisExtent: 180,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                   childAspectRatio: 1.1,
@@ -233,16 +290,15 @@ class _PasswordListTabState extends State<PasswordListTab> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final cat = _categoryData[index];
-                    final name = cat.name;
-                    final count = name == 'All' 
+                    final count = cat.name == 'All' 
                         ? allPasswords.length 
-                        : allPasswords.where((p) => p.category == name).length;
+                        : allPasswords.where((p) => p.category == cat.name).length;
 
                     return _buildDesktopCategoryCard(context, cat, count, () {
                         if (widget.onCategorySelected != null) {
-                          widget.onCategorySelected!(name);
+                          widget.onCategorySelected!(cat.name);
                         } else {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryDetailScreen(category: name)));
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryDetailScreen(category: cat.name)));
                         }
                     });
                   },
@@ -250,10 +306,10 @@ class _PasswordListTabState extends State<PasswordListTab> {
                 ),
               ),
             ),
-             const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
-          ],
-        ),
-      ),
+             const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -262,36 +318,28 @@ class _PasswordListTabState extends State<PasswordListTab> {
   Widget _buildDesktopPasswordCard(BuildContext context, dynamic entry) {
       return Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(16),
+          color: Colors.white.withOpacity(0.04),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.white.withOpacity(0.1)),
         ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditPasswordScreen(entry: entry))),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.lock, color: Theme.of(context).colorScheme.primary, size: 24),
-                ),
-                const SizedBox(height: 12),
+                Icon(Icons.lock_outline, color: Colors.tealAccent.withOpacity(0.7), size: 24),
+                const SizedBox(height: 10),
                 Text(
                   entry.title, 
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.white),
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.white),
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
                 Text(
                   entry.username, 
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
@@ -301,23 +349,8 @@ class _PasswordListTabState extends State<PasswordListTab> {
       );
   }
 
-  Widget _buildPasswordTile(BuildContext context, dynamic entry) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Card(
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            leading: CircleAvatar(
-              radius: 24,
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              child: Icon(Icons.lock, color: Theme.of(context).colorScheme.primary),
-            ),
-            title: Text(entry.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(entry.username),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditPasswordScreen(entry: entry))),
-          ),
-        ),
-      );
+  Widget _buildDesktopCategoryCard(BuildContext context, CategoryItem cat, int count, VoidCallback onTap) {
+    return _SmoothCategoryCard(cat: cat, count: count, onTap: onTap);
   }
 }
 
@@ -360,31 +393,22 @@ class _NotesListTabState extends State<NotesListTab> {
        backgroundColor: Colors.transparent,
        body: Column(
          children: [
-          // Drag Header
-          DragToMoveArea(
-            child: Container(
-              height: 48,
-              color: Colors.transparent,
-            ),
-          ),
+          DragToMoveArea(child: Container(height: (Platform.isWindows || Platform.isLinux) ? 48 : 0)),
           Expanded(
             child: CustomScrollView(
              slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                    padding: EdgeInsets.fromLTRB(24, Platform.isAndroid ? 50 : 16, 24, 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'NOTES', 
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white)
-                            ),
+                            const Text('NOTES', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white, letterSpacing: 2)),
                             _LiquidGlassButton(
-                              label: 'Add Note',
+                              label: 'Add',
                               icon: Icons.add,
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditNoteScreen())),
                             ),
@@ -414,10 +438,7 @@ class _NotesListTabState extends State<NotesListTab> {
           if (isSearching)
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                   final note = searchResults[index];
-                   return _buildNoteTile(context, note);
-                },
+                (context, index) => _buildNoteTile(context, searchResults[index]),
                 childCount: searchResults.length,
               ),
             )
@@ -426,7 +447,7 @@ class _NotesListTabState extends State<NotesListTab> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 250,
+                  maxCrossAxisExtent: 180,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                   childAspectRatio: 1.1,
@@ -434,83 +455,43 @@ class _NotesListTabState extends State<NotesListTab> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final cat = _noteCategories[index];
-                    final name = cat.name;
-                    final count = name == 'All' 
+                    final count = cat.name == 'All' 
                         ? notes.length 
-                        : notes.where((n) => n.category == name).length;
+                        : notes.where((n) => n.category == cat.name).length;
 
-                    return _buildDesktopCategoryCard(context, cat, count, () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => NoteCategoryDetailScreen(category: name)));
+                    return _SmoothCategoryCard(cat: cat, count: count, onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => NoteCategoryDetailScreen(category: cat.name)));
                     });
                   },
                   childCount: _noteCategories.length,
                 ),
               ),
             ),
-             const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
-          ],
-        ),
-      ),
+             const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildNoteTile(BuildContext context, dynamic note) {
-      final IconData catIcon = _noteCategories.firstWhere(
-        (c) => c.name == note.category, 
-        orElse: () => CategoryItem(name: 'Other', icon: Icons.note_outlined, color: Colors.tealAccent)
-      ).icon;
-
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: ListTile(
            contentPadding: const EdgeInsets.all(16),
            leading: CircleAvatar(
              backgroundColor: Colors.white.withOpacity(0.05),
-             child: Icon(catIcon, color: Colors.tealAccent.withOpacity(0.7), size: 18),
+             child: const Icon(Icons.description_outlined, color: Colors.tealAccent, size: 18),
            ),
            title: Text(note.title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-           subtitle: Text(note.category, style: const TextStyle(color: Colors.white54)),
+           subtitle: Text(note.category, style: const TextStyle(color: Colors.white38)),
            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditNoteScreen(note: note))),
         ),
       );
   }
 }
-
-Widget _buildCategoryCard(BuildContext context, CategoryItem cat, int count, VoidCallback onTap) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      color: Theme.of(context).cardTheme.color,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: (cat.color).withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(cat.icon, size: 32, color: cat.color),
-            ),
-            const SizedBox(height: 12),
-            Text(cat.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 4),
-            Text('$count items', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
-          ],
-        ),
-      ),
-    );
-}
-
-Widget _buildDesktopCategoryCard(BuildContext context, CategoryItem cat, int count, VoidCallback onTap) {
-    return _SmoothCategoryCard(cat: cat, count: count, onTap: onTap);
-}
-
 
 class _SmoothCategoryCard extends StatefulWidget {
   final CategoryItem cat;
@@ -532,72 +513,41 @@ class _SmoothCategoryCardState extends State<_SmoothCategoryCard> {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() { _hovered = false; _pressed = false; }),
+      onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
         onTapDown: (_) => setState(() => _pressed = true),
-        onTapUp: (_) { setState(() => _pressed = false); widget.onTap(); },
+        onTapUp: (_) {
+          setState(() => _pressed = false); 
+          widget.onTap();
+        },
         onTapCancel: () => setState(() => _pressed = false),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOutCubic,
           transform: Matrix4.identity()..scale(_pressed ? 0.96 : 1.0),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.06), // Premium 6% white op
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.15), // Premium 15% white op border
-              width: 1,
-            ),
+            color: Colors.white.withOpacity(0.04),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
             boxShadow: [
-              // Outer drop shadow for elevation
-              if (_hovered)
-                BoxShadow(color: color.withOpacity(0.25), blurRadius: 20, spreadRadius: 0, offset: const Offset(0, 4))
-              else
-                BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 2)),
-              // Inner top edge highlight for realism
-              BoxShadow(color: Colors.white.withOpacity(0.1), offset: const Offset(0, 1.5), blurRadius: 0, spreadRadius: 0),
+              if (_hovered) BoxShadow(color: color.withOpacity(0.25), blurRadius: 20, offset: const Offset(0, 4)),
+              BoxShadow(color: Colors.white.withOpacity(0.1), offset: const Offset(0, 1.5), blurRadius: 0),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOut,
-                width: 56, height: 56,
-                decoration: BoxDecoration(
-                  color: _hovered ? color.withOpacity(0.18) : Colors.white.withOpacity(0.07),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: _hovered ? color.withOpacity(0.4) : Colors.white.withOpacity(0.1),
-                  ),
-                ),
-                child: Icon(widget.cat.icon, size: 26, color: _hovered ? color : color.withOpacity(0.7)),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(widget.cat.icon, size: 22, color: _hovered ? color : color.withOpacity(0.7)),
+                  const SizedBox(height: 10),
+                  Text(widget.cat.name, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: _hovered ? Colors.white : Colors.white.withOpacity(0.85))),
+                  const SizedBox(height: 5),
+                  Text('${widget.count} items', style: TextStyle(color: _hovered ? color.withOpacity(0.8) : Colors.white38, fontSize: 11)),
+                ],
               ),
-              const SizedBox(height: 14),
-              Text(widget.cat.name,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                  color: _hovered ? Colors.white : Colors.white.withOpacity(0.85),
-                ),
-              ),
-              const SizedBox(height: 5),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 180),
-                style: TextStyle(
-                  color: _hovered ? color.withOpacity(0.8) : Colors.white38,
-                  fontSize: 12,
-                  fontWeight: _hovered ? FontWeight.w600 : FontWeight.normal,
-                ),
-                child: Text('${widget.count} items'),
-              ),
-            ],
-          ),
             ),
           ),
         ),
@@ -606,18 +556,11 @@ class _SmoothCategoryCardState extends State<_SmoothCategoryCard> {
   }
 }
 
-// ─────────────── Premium Liquid Glass Button ───────────────
-
 class _LiquidGlassButton extends StatefulWidget {
   final String label;
   final IconData icon;
   final VoidCallback onTap;
-
-  const _LiquidGlassButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
+  const _LiquidGlassButton({required this.label, required this.icon, required this.onTap});
 
   @override
   State<_LiquidGlassButton> createState() => _LiquidGlassButtonState();
@@ -637,38 +580,21 @@ class _LiquidGlassButtonState extends State<_LiquidGlassButton> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutQuart,
-          // Hover lift
-          transform: _hovered ? (Matrix4.identity()..translate(0.0, -2.0)) : Matrix4.identity(),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF1E293B), Color(0xFF3B82F6)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.15),
-              width: 1.0,
-            ),
-            boxShadow: _hovered
-                ? [BoxShadow(color: const Color(0xFF3B82F6).withOpacity(0.35), blurRadius: 20, offset: const Offset(0, 4))]
-                : [BoxShadow(color: const Color(0xFF3B82F6).withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 2))],
+            gradient: const LinearGradient(colors: [Color(0xFF1E293B), Color(0xFF3B82F6)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white.withOpacity(0.15)),
+            boxShadow: [
+               BoxShadow(color: const Color(0xFF3B82F6).withOpacity(_hovered ? 0.35 : 0.15), blurRadius: _hovered ? 15 : 8),
+            ],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(widget.icon, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                widget.label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                  letterSpacing: 0.3,
-                ),
-              ),
+              Icon(widget.icon, color: Colors.white, size: 18),
+              const SizedBox(width: 6),
+              Text(widget.label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
             ],
           ),
         ),

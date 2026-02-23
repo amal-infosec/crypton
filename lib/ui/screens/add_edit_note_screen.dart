@@ -1,4 +1,5 @@
-
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
@@ -108,6 +109,8 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isAndroid = !kIsWeb && Platform.isAndroid;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
@@ -138,90 +141,105 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
           ),
         ),
         child: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                    child: Container(
-                      padding: const EdgeInsets.all(28),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
-                        boxShadow: [
-                           BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 24, spreadRadius: 5)
-                        ]
-                      ),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            _buildGlassTextField(
-                               controller: _titleController, 
-                               label: 'Title', 
-                               icon: Icons.title, 
-                               validator: (v) => v!.isEmpty ? 'Required' : null
-                            ),
-                            const SizedBox(height: 20),
-                            DropdownButtonFormField<String>(
-                              value: _category,
-                              dropdownColor: const Color(0xFF1E1E24).withOpacity(0.9),
-                              style: const TextStyle(color: Colors.white),
-                              decoration: InputDecoration(
-                                labelText: 'Category',
-                                labelStyle: const TextStyle(color: Colors.white70),
-                                prefixIcon: const Icon(Icons.category, color: Colors.white70),
-                                filled: true,
-                                fillColor: Colors.white.withOpacity(0.05),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
-                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
-                                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.tealAccent.withOpacity(0.5))),
-                              ),
-                              items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                              onChanged: (v) => setState(() => _category = v!),
-                            ),
-                            const SizedBox(height: 20),
-                            Expanded(
-                              child: _buildGlassTextField(
-                                controller: _contentController,
-                                label: 'Confidential Content',
-                                icon: Icons.notes,
-                                maxLines: null,
-                                validator: (v) => v!.isEmpty ? 'Required' : null,
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white.withOpacity(0.1),
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isAndroid ? 20 : 24, 
+                    vertical: isAndroid ? 10 : 16
+                  ),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: isAndroid ? double.infinity : 600),
+                      child: isAndroid 
+                        ? Form(key: _formKey, child: _buildFormFields())
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                              child: Container(
+                                padding: const EdgeInsets.all(28),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+                                  boxShadow: [
+                                     BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 24, spreadRadius: 5)
+                                  ]
                                 ),
-                                onPressed: _save,
-                                child: const Text('Save Note', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+                                child: Form(
+                                  key: _formKey,
+                                  child: _buildFormFields(),
+                                ),
                               ),
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFormFields() {
+    return Column(
+      children: [
+        _buildGlassTextField(
+           controller: _titleController, 
+           label: 'Title', 
+           icon: Icons.title, 
+           validator: (v) => v!.isEmpty ? 'Required' : null
+        ),
+        const SizedBox(height: 20),
+        DropdownButtonFormField<String>(
+          value: _category,
+          dropdownColor: const Color(0xFF1E1E24).withOpacity(0.9),
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            labelText: 'Category',
+            labelStyle: const TextStyle(color: Colors.white70),
+            prefixIcon: const Icon(Icons.category, color: Colors.white70),
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.05),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.white.withOpacity(0.1))),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.tealAccent.withOpacity(0.5))),
+          ),
+          items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+          onChanged: (v) => setState(() => _category = v!),
+        ),
+        const SizedBox(height: 20),
+        Expanded(
+          child: _buildGlassTextField(
+            controller: _contentController,
+            label: 'Confidential Content',
+            icon: Icons.notes,
+            maxLines: null,
+            validator: (v) => v!.isEmpty ? 'Required' : null,
+          ),
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white.withOpacity(0.1),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              side: BorderSide(color: Colors.white.withOpacity(0.3), width: 1),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            onPressed: _save,
+            child: const Text('Save Note', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+          ),
+        ),
+      ],
     );
   }
 
