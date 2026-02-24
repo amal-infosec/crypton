@@ -87,27 +87,21 @@ class _MobileHomeContentState extends State<_MobileHomeContent> {
             child: Container(
               height: 72,
               decoration: BoxDecoration(
-                color: const Color(0xFF1E1B4B).withOpacity(0.9),
+                color: const Color(0xFF1E1B4B).withOpacity(0.95),
                 borderRadius: BorderRadius.circular(36),
                 border: Border.all(color: Colors.white.withOpacity(0.12), width: 1),
                 boxShadow: [
                   BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 8)),
                 ],
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(36),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildDockItem(0, Icons.shield_outlined, Icons.shield, 'Vault'),
-                      _buildDockItem(1, Icons.play_circle_outline, Icons.play_circle, 'Media'),
-                      _buildDockItem(2, Icons.description_outlined, Icons.description, 'Notes'),
-                      _buildDockItem(3, Icons.settings_outlined, Icons.settings, 'Settings'),
-                    ],
-                  ),
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildDockItem(0, Icons.shield_outlined, Icons.shield, 'Vault'),
+                  _buildDockItem(1, Icons.play_circle_outline, Icons.play_circle, 'Media'),
+                  _buildDockItem(2, Icons.description_outlined, Icons.description, 'Notes'),
+                  _buildDockItem(3, Icons.settings_outlined, Icons.settings, 'Settings'),
+                ],
               ),
             ),
           ),
@@ -233,10 +227,27 @@ class _PasswordListTabState extends State<PasswordListTab> {
                                 )
                               ),
                             ),
-                            _LiquidGlassButton(
-                              label: 'Add',
-                              icon: Icons.add,
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditPasswordScreen())),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.lock_open, color: Colors.white70),
+                                  onPressed: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      builder: (_) => const StealthAuthScreen(),
+                                    );
+                                  },
+                                  tooltip: 'Unhide Items',
+                                ),
+                                const SizedBox(width: 8),
+                                _LiquidGlassButton(
+                                  label: 'Add',
+                                  icon: Icons.add,
+                                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditPasswordScreen())),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -347,7 +358,7 @@ class _PasswordListTabState extends State<PasswordListTab> {
                   ],
                 ),
               ),
-              if (entry.isStealth)
+              if (entry.isStealth == true)
                 Positioned(
                   top: 8, right: 8,
                   child: Container(
@@ -559,21 +570,15 @@ class _SmoothCategoryCardState extends State<_SmoothCategoryCard> {
               BoxShadow(color: Colors.white.withOpacity(0.1), offset: const Offset(0, 1.5), blurRadius: 0),
             ],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(widget.cat.icon, size: 22, color: _hovered ? color : color.withOpacity(0.7)),
-                  const SizedBox(height: 10),
-                  Text(widget.cat.name, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: _hovered ? Colors.white : Colors.white.withOpacity(0.85))),
-                  const SizedBox(height: 5),
-                  Text('${widget.count} items', style: TextStyle(color: _hovered ? color.withOpacity(0.8) : Colors.white38, fontSize: 11)),
-                ],
-              ),
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(widget.cat.icon, size: 22, color: _hovered ? color : color.withOpacity(0.7)),
+              const SizedBox(height: 10),
+              Text(widget.cat.name, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: _hovered ? Colors.white : Colors.white.withOpacity(0.85))),
+              const SizedBox(height: 5),
+              Text('${widget.count} items', style: TextStyle(color: _hovered ? color.withOpacity(0.8) : Colors.white38, fontSize: 11)),
+            ],
           ),
         ),
       ),

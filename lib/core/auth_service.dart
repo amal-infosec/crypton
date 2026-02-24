@@ -66,7 +66,6 @@ class AuthService {
     await _storage.write(key: _kRealPinHash, value: realPinHash);
     await _storage.write(key: _kFakePinHash, value: fakePinHash);
     await _storage.write(key: _kRealKeyBlob, value: base64Encode(realKeyEncrypted));
-    await _storage.write(key: _kRealKeyBlob, value: base64Encode(realKeyEncrypted));
     await _storage.write(key: _kFakeKeyBlob, value: base64Encode(fakeKeyEncrypted));
     // Store PIN for Biometric access
     await _storage.write(key: 'bio_pin_v1', value: realPin);
@@ -98,8 +97,14 @@ class AuthService {
   Future<(AuthResult, Uint8List?)> authenticate(String pin) async {
     final pinHash = sha256.convert(utf8.encode(pin)).toString();
     
-    final storedRealHash = await _storage.read(key: _kRealPinHash);
-    final storedFakeHash = await _storage.read(key: _kFakePinHash);
+    // Parallel read for speed
+    final hashes = await Future.wait([
+      _storage.read(key: _kRealPinHash),
+      _storage.read(key: _kFakePinHash),
+    ]);
+    
+    final storedRealHash = hashes[0];
+    final storedFakeHash = hashes[1];
 
     if (pinHash == storedRealHash) {
       // It's the real PIN. Decrypt the Real Key.

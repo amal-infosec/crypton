@@ -104,15 +104,11 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
         return Material(
           type: MaterialType.transparency,
           child: Center(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(28),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                child: Container(
+            child: Container(
                   width: 440,
                   constraints: const BoxConstraints(maxHeight: 560),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A1735).withOpacity(0.93),
+                    color: const Color(0xFF1A1735).withOpacity(0.96),
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(color: catColor.withOpacity(0.28), width: 1.5),
                     boxShadow: [
@@ -258,12 +254,10 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
-      },
-    );
-  }
+      }
 
   Widget _popupField(IconData icon, String label, String value, Color catColor, {bool multiline = false}) {
     return Column(
@@ -325,22 +319,16 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
   }
 
   Widget _buildGlassPanel({required Widget child, double? width}) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-        child: Container(
+    return Container(
           width: width,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withOpacity(0.06),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.white.withOpacity(0.12)),
           ),
           child: child,
-        ),
-      ),
-    );
+        );
   }
 
   Widget _infoRow(IconData icon, String label) {
@@ -696,7 +684,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (_selectedEntry!.isStealth) ...[
+                  if (_selectedEntry!.isStealth == true) ...[
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -867,7 +855,7 @@ class _PasswordTileState extends State<_PasswordTile> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (widget.entry.isStealth) ...[
+                            if (widget.entry.isStealth == true) ...[
                               const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

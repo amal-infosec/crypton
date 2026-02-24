@@ -22,8 +22,6 @@ class StorageService extends ChangeNotifier {
   Future<void> init(List<int> encryptionKey, {bool isFakeMode = false}) async {
     if (_isInitialized) return;
 
-    await Hive.initFlutter();
-    
     // Register Adapters
     if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(PasswordEntryAdapter());
     if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(SecureNoteAdapter());
@@ -32,20 +30,25 @@ class StorageService extends ChangeNotifier {
     _isFakeMode = isFakeMode;
     final boxPrefix = isFakeMode ? 'fake_' : '';
 
-    _passwordBox = await Hive.openBox<PasswordEntry>(
-      '${boxPrefix}passwords',
-      encryptionCipher: HiveAesCipher(encryptionKey),
-    );
+    // Open boxes in parallel to significantly reduce initialization time
+    final results = await Future.wait([
+      Hive.openBox<PasswordEntry>(
+        '${boxPrefix}passwords',
+        encryptionCipher: HiveAesCipher(encryptionKey),
+      ),
+      Hive.openBox<SecureNote>(
+        '${boxPrefix}notes',
+        encryptionCipher: HiveAesCipher(encryptionKey),
+      ),
+      Hive.openBox<SecureMedia>(
+        '${boxPrefix}media',
+        encryptionCipher: HiveAesCipher(encryptionKey),
+      ),
+    ]);
 
-    _noteBox = await Hive.openBox<SecureNote>(
-      '${boxPrefix}notes',
-      encryptionCipher: HiveAesCipher(encryptionKey),
-    );
-
-    _mediaBox = await Hive.openBox<SecureMedia>(
-      '${boxPrefix}media',
-      encryptionCipher: HiveAesCipher(encryptionKey),
-    );
+    _passwordBox = results[0] as Box<PasswordEntry>;
+    _noteBox = results[1] as Box<SecureNote>;
+    _mediaBox = results[2] as Box<SecureMedia>;
 
     _isInitialized = true;
     
@@ -69,7 +72,7 @@ class StorageService extends ChangeNotifier {
   List<PasswordEntry> getPasswords() {
     final all = _passwordBox.values.toList();
     if (_isStealthUnlocked) return all;
-    return all.where((p) => !p.isStealth).toList();
+    return all.where((p) => p.isStealth != true).toList();
   }
 
   Future<void> savePassword(PasswordEntry entry) async {
@@ -91,7 +94,7 @@ class StorageService extends ChangeNotifier {
   List<SecureNote> getNotes() {
     final all = _noteBox.values.toList();
     if (_isStealthUnlocked) return all;
-    return all.where((n) => !n.isStealth).toList();
+    return all.where((n) => n.isStealth != true).toList();
   }
 
   Future<void> saveNote(SecureNote note) async {
@@ -161,8 +164,8 @@ class StorageService extends ChangeNotifier {
 
   List<SecureMedia> getMedia() {
     final all = _mediaBox.values.toList();
-    if (_isStealthUnlocked) return all;
-    return all.where((m) => !m.isStealth).toList();
+    if (_isMediaUnlocked) return all;
+    return all.where((m) => m.isStealth != true).toList();
   }
 
   Future<void> saveMedia(SecureMedia media) async {

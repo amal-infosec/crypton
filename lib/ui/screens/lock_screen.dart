@@ -9,7 +9,7 @@ import 'dart:ui';
 import '../../core/auth_service.dart';
 import '../../core/storage_service.dart';
 import '../../core/encryption_service.dart';
-import 'home_screen.dart'; // We will create this next
+import 'home_screen.dart';
 
 class LockScreen extends StatefulWidget {
   const LockScreen({super.key});
@@ -55,11 +55,17 @@ class _LockScreenState extends State<LockScreen> {
       _isSetupMode = !hasAccount;
       if (_isSetupMode) {
         _statusMessage = 'Create Master Password';
-      } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _passFocusNode.requestFocus();
         });
-        _tryBiometricAuth(); // Auto-trigger biometrics if available
+      } else {
+        // Delay keyboard focus on mobile to allow biometrics to show first
+        if (kIsWeb || (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+           WidgetsBinding.instance.addPostFrameCallback((_) {
+            _passFocusNode.requestFocus();
+          });
+        }
+        _tryBiometricAuth(); 
       }
     });
   }
@@ -161,8 +167,6 @@ class _LockScreenState extends State<LockScreen> {
     } else {
       // Auth Flow
       setState(() => _isLoading = true);
-      // Small delay for UI feedback
-      await Future.delayed(const Duration(milliseconds: 300));
 
       final (result, key) = await authService.authenticate(pin);
       if (!mounted) return;
@@ -235,44 +239,48 @@ class _LockScreenState extends State<LockScreen> {
               ),
             ),
           ),
-          Positioned(
-            top: -150,
-            left: -150,
-            child: Container(
-              width: 700,
-              height: 700,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFF6366F1).withOpacity(0.35), // Premium Indigo
-                    const Color(0xFF6366F1).withOpacity(0.05),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
+          if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) ...[
+             // Simplified background for mobile to reduce lag
+          ] else ...[
+            Positioned(
+              top: -150,
+              left: -150,
+              child: Container(
+                width: 700,
+                height: 700,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFF6366F1).withOpacity(0.35),
+                      const Color(0xFF6366F1).withOpacity(0.05),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: -250,
-            right: -200,
-            child: Container(
-              width: 800,
-              height: 800,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFF8B5CF6).withOpacity(0.35), // Premium Violet
-                    const Color(0xFF8B5CF6).withOpacity(0.05),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.6, 1.0],
+            Positioned(
+              bottom: -250,
+              right: -200,
+              child: Container(
+                width: 800,
+                height: 800,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(0xFF8B5CF6).withOpacity(0.35),
+                      const Color(0xFF8B5CF6).withOpacity(0.05),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.6, 1.0],
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -284,33 +292,23 @@ class _LockScreenState extends State<LockScreen> {
                   constraints: const BoxConstraints(maxWidth: 400),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                      child: Container(
-                        padding: const EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(
-                            0.04,
-                          ), // Subtle frosted tint
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.12),
-                            width: 1.0,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.5),
-                              blurRadius: 40,
-                              offset: const Offset(0, 10),
-                            ),
-                            BoxShadow(
-                              color: Colors.white.withOpacity(0.05),
-                              offset: const Offset(0, 1),
-                              blurRadius: 0,
-                              spreadRadius: 0,
-                            ),
-                          ],
+                    child: Container(
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.06), 
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.12),
+                        width: 1.0,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.35),
+                          blurRadius: 30,
+                          offset: const Offset(0, 10),
                         ),
+                      ],
+                    ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -337,7 +335,7 @@ class _LockScreenState extends State<LockScreen> {
                               controller: _passController,
                               focusNode: _passFocusNode,
                               obscureText: _obscureText,
-                              autofocus: true,
+                              autofocus: false,
                               onSubmitted: (_) => _submitPassword(),
                               keyboardType: (!kIsWeb && Platform.isAndroid) ? TextInputType.number : TextInputType.text,
                               style: GoogleFonts.outfit(
@@ -439,7 +437,6 @@ class _LockScreenState extends State<LockScreen> {
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

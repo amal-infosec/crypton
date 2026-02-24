@@ -7,12 +7,13 @@ import 'core/auth_service.dart';
 import 'core/storage_service.dart';
 import 'core/encryption_service.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'ui/theme.dart';
 import 'ui/screens/lock_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
+  await Hive.initFlutter();
 
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     await windowManager.ensureInitialized();

@@ -24,7 +24,7 @@ class PasswordEntryAdapter extends TypeAdapter<PasswordEntry> {
       website: fields[4] as String?,
       notes: fields[5] as String?,
       category: fields[6] as String,
-      isStealth: fields[9] as bool,
+      isStealth: fields[9] as bool?,
       createdAt: fields[7] as DateTime?,
       updatedAt: fields[8] as DateTime?,
     );
@@ -82,7 +82,7 @@ class SecureNoteAdapter extends TypeAdapter<SecureNote> {
       title: fields[1] as String,
       encryptedContent: fields[2] as String,
       category: fields[3] as String,
-      isStealth: fields[6] as bool,
+      isStealth: fields[6] as bool?,
       createdAt: fields[4] as DateTime?,
       updatedAt: fields[5] as DateTime?,
     );
@@ -134,7 +134,7 @@ class SecureMediaAdapter extends TypeAdapter<SecureMedia> {
       title: fields[1] as String,
       fileName: fields[2] as String,
       mediaType: fields[3] as String,
-      isStealth: fields[4] as bool,
+      isStealth: fields[4] as bool?,
       createdAt: fields[5] as DateTime?,
       thumbnailPath: fields[6] as String?,
     );

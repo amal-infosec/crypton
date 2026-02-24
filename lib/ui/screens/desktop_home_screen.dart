@@ -10,6 +10,7 @@ import 'add_edit_password_screen.dart';
 import 'add_edit_note_screen.dart';
 import 'media_vault_tab.dart';
 import 'stealth_auth_screen.dart';
+import 'lock_screen.dart';
 import 'dart:ui';
 import 'dart:io' show Platform;
 
@@ -150,16 +151,16 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 14),
               children: [
                 _sidebarSectionLabel('VAULT'),
-                _sidebarItem('All Items', Icons.shield_outlined, Colors.tealAccent, count: allPasswords.length, isSelected: _selectedSection == 'All Vaults', onTap: () => setState(() => _selectedSection = 'All Vaults')),
+                _sidebarItem('All Items', Icons.shield_outlined, Colors.tealAccent, isSelected: _selectedSection == 'All Vaults', onTap: () => setState(() => _selectedSection = 'All Vaults')),
                 _sidebarItem('Categories', Icons.grid_view_rounded, Colors.blueAccent, isSelected: _selectedSection == 'Categories', onTap: () => setState(() => _selectedSection = 'All Vaults')),
                 
                 const SizedBox(height: 32),
                 _sidebarSectionLabel('PRIVATE MEDIA'),
-                _sidebarItem('Secure Media', Icons.play_circle_outline, Colors.orangeAccent, count: storage.getMedia().length, isSelected: _selectedSection == 'Media', onTap: () => setState(() => _selectedSection = 'Media')),
+                _sidebarItem('Secure Media', Icons.play_circle_outline, Colors.orangeAccent, isSelected: _selectedSection == 'Media', onTap: () => setState(() => _selectedSection = 'Media')),
                 
                 const SizedBox(height: 32),
                 _sidebarSectionLabel('ORGANIZATION'),
-                _sidebarItem('Secure Notes', Icons.description_outlined, Colors.purpleAccent, count: storage.getNotes().length, isSelected: _selectedSection == 'Notes', onTap: () => setState(() => _selectedSection = 'Notes')),
+                _sidebarItem('Secure Notes', Icons.description_outlined, Colors.purpleAccent, isSelected: _selectedSection == 'Notes', onTap: () => setState(() => _selectedSection = 'Notes')),
               ],
             ),
           ),
@@ -178,7 +179,7 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
     );
   }
 
-  Widget _sidebarItem(String title, IconData icon, Color accent, {int? count, required bool isSelected, required VoidCallback onTap}) {
+  Widget _sidebarItem(String title, IconData icon, Color accent, {required bool isSelected, required VoidCallback onTap}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: InkWell(
@@ -197,7 +198,6 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
               Icon(icon, size: 18, color: isSelected ? accent : Colors.white54),
               const SizedBox(width: 12),
               Expanded(child: Text(title, style: TextStyle(color: isSelected ? Colors.white : Colors.white60, fontSize: 13, fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal))),
-              if (count != null) Text(count.toString(), style: TextStyle(color: isSelected ? accent.withOpacity(0.7) : Colors.white24, fontSize: 11, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -215,6 +215,13 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
     );
   }
 
+  void _lockApp() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LockScreen()),
+      (route) => false,
+    );
+  }
+
   Widget _buildMainContent() {
     Widget content;
     if (_selectedSection == 'All Vaults') {
@@ -229,6 +236,8 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
        content = const Center(child: Text('Unknown section'));
     }
 
+    final storage = context.watch<StorageService>();
+
     return Column(
       children: [
         DragToMoveArea(
@@ -237,8 +246,39 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
             color: Colors.transparent,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                const Spacer(),
+                // App Actions
+                if (_selectedSection == 'Media') ...[
+                  _buildAppControlButton(
+                    icon: Icons.lock_open_rounded,
+                    color: Colors.tealAccent,
+                    tooltip: 'Unhide Items',
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context, 
+                        isScrollControlled: true, 
+                        backgroundColor: Colors.transparent, 
+                        builder: (_) => const StealthAuthScreen()
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  _buildAppControlButton(
+                    icon: Icons.add_to_photos_outlined,
+                    color: Colors.tealAccent,
+                    tooltip: 'Media Vault',
+                    onTap: () => setState(() => _selectedSection = 'Media'),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                _buildAppControlButton(
+                  icon: Icons.lock_outline_rounded,
+                  color: Colors.orangeAccent,
+                  tooltip: 'Lock App',
+                  onTap: _lockApp,
+                ),
+                const SizedBox(width: 32),
                 _buildWindowControlButton(Icons.remove, const Color(0xFFFFBD2E), () => windowManager.minimize()),
                 const SizedBox(width: 8),
                 _buildWindowControlButton(Icons.expand_less_rounded, const Color(0xFF27C93F), () async {
@@ -253,6 +293,20 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
         ),
         Expanded(child: content),
       ],
+    );
+  }
+
+  Widget _buildAppControlButton({required IconData icon, required Color color, required String tooltip, required VoidCallback onTap}) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          child: Icon(icon, color: color.withOpacity(0.8), size: 18),
+        ),
+      ),
     );
   }
 

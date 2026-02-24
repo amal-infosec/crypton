@@ -28,6 +28,13 @@ class MediaVaultTab extends StatefulWidget {
 class _MediaVaultTabState extends State<MediaVaultTab> {
   bool _isImporting = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Lazy initialize MediaKit only when entering the media vault
+    MediaKit.ensureInitialized();
+  }
+
   Future<void> _importMedia() async {
     FilePickerResult? result;
     try {
@@ -308,7 +315,7 @@ class _MediaCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (media.isStealth)
+              if (media.isStealth == true)
                 Positioned(
                   top: 8, right: 8,
                   child: Icon(Icons.security, size: 14, color: Colors.tealAccent.withOpacity(0.7)),
