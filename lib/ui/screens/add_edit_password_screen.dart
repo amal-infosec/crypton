@@ -27,6 +27,7 @@ class _AddEditPasswordScreenState extends State<AddEditPasswordScreen> {
   late TextEditingController _notesController;
   String _category = 'General';
   bool _isObscure = true;
+  bool _isStealth = false;
 
   final List<String> _categories = [
     'General',
@@ -57,6 +58,7 @@ class _AddEditPasswordScreenState extends State<AddEditPasswordScreen> {
     _urlController = TextEditingController(text: e?.website);
     _notesController = TextEditingController(text: e?.notes);
     _category = e?.category ?? 'General';
+    _isStealth = e?.isStealth ?? false;
 
     if (e != null) {
       _decryptExistingPassword(e);
@@ -170,6 +172,7 @@ class _AddEditPasswordScreenState extends State<AddEditPasswordScreen> {
         entry.website = _urlController.text;
         entry.notes = _notesController.text;
         entry.category = _category;
+        entry.isStealth = _isStealth;
         entry.updatedAt = DateTime.now();
         
         await storage.savePassword(entry);
@@ -182,6 +185,7 @@ class _AddEditPasswordScreenState extends State<AddEditPasswordScreen> {
           website: _urlController.text,
           notes: _notesController.text,
           category: _category,
+          isStealth: _isStealth,
         );
         await storage.savePassword(entry);
       }
@@ -371,6 +375,16 @@ class _AddEditPasswordScreenState extends State<AddEditPasswordScreen> {
            label: 'Notes', 
            icon: Icons.note, 
            maxLines: 4
+        ),
+        const SizedBox(height: 20),
+        SwitchListTile(
+          title: const Text('Stealth Mode', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          subtitle: const Text('Hide this item in the normal vault view', style: TextStyle(color: Colors.white54, fontSize: 12)),
+          secondary: Icon(Icons.security, color: _isStealth ? Colors.tealAccent : Colors.white70),
+          value: _isStealth,
+          activeColor: Colors.tealAccent,
+          onChanged: (v) => setState(() => _isStealth = v),
+          contentPadding: EdgeInsets.zero,
         ),
         const SizedBox(height: 24),
         SizedBox(

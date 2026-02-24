@@ -24,6 +24,7 @@ class PasswordEntryAdapter extends TypeAdapter<PasswordEntry> {
       website: fields[4] as String?,
       notes: fields[5] as String?,
       category: fields[6] as String,
+      isStealth: fields[9] as bool,
       createdAt: fields[7] as DateTime?,
       updatedAt: fields[8] as DateTime?,
     );
@@ -32,7 +33,7 @@ class PasswordEntryAdapter extends TypeAdapter<PasswordEntry> {
   @override
   void write(BinaryWriter writer, PasswordEntry obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -50,7 +51,9 @@ class PasswordEntryAdapter extends TypeAdapter<PasswordEntry> {
       ..writeByte(7)
       ..write(obj.createdAt)
       ..writeByte(8)
-      ..write(obj.updatedAt);
+      ..write(obj.updatedAt)
+      ..writeByte(9)
+      ..write(obj.isStealth);
   }
 
   @override
@@ -79,6 +82,7 @@ class SecureNoteAdapter extends TypeAdapter<SecureNote> {
       title: fields[1] as String,
       encryptedContent: fields[2] as String,
       category: fields[3] as String,
+      isStealth: fields[6] as bool,
       createdAt: fields[4] as DateTime?,
       updatedAt: fields[5] as DateTime?,
     );
@@ -87,7 +91,7 @@ class SecureNoteAdapter extends TypeAdapter<SecureNote> {
   @override
   void write(BinaryWriter writer, SecureNote obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -99,7 +103,9 @@ class SecureNoteAdapter extends TypeAdapter<SecureNote> {
       ..writeByte(4)
       ..write(obj.createdAt)
       ..writeByte(5)
-      ..write(obj.updatedAt);
+      ..write(obj.updatedAt)
+      ..writeByte(6)
+      ..write(obj.isStealth);
   }
 
   @override

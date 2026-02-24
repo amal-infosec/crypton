@@ -122,6 +122,24 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
                        ],
                      ),
                    ),
+                   if (storage.isStealthUnlocked) ...[
+                     const SizedBox(width: 12),
+                     Container(
+                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                       decoration: BoxDecoration(
+                         color: Colors.redAccent.withOpacity(0.2),
+                         borderRadius: BorderRadius.circular(4),
+                         border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
+                       ),
+                       child: const Row(
+                         children: [
+                           Icon(Icons.security, color: Colors.redAccent, size: 10),
+                           SizedBox(width: 4),
+                           Text('STEALTH', style: TextStyle(color: Colors.redAccent, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                         ],
+                       ),
+                     ),
+                   ],
                 ],
               ),
             ),
@@ -137,11 +155,11 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
                 
                 const SizedBox(height: 32),
                 _sidebarSectionLabel('PRIVATE MEDIA'),
-                _sidebarItem('Secure Media', Icons.play_circle_outline, Colors.orangeAccent, isSelected: _selectedSection == 'Media', onTap: () => setState(() => _selectedSection = 'Media')),
+                _sidebarItem('Secure Media', Icons.play_circle_outline, Colors.orangeAccent, count: storage.getMedia().length, isSelected: _selectedSection == 'Media', onTap: () => setState(() => _selectedSection = 'Media')),
                 
                 const SizedBox(height: 32),
                 _sidebarSectionLabel('ORGANIZATION'),
-                _sidebarItem('Secure Notes', Icons.description_outlined, Colors.purpleAccent, isSelected: _selectedSection == 'Notes', onTap: () => setState(() => _selectedSection = 'Notes')),
+                _sidebarItem('Secure Notes', Icons.description_outlined, Colors.purpleAccent, count: storage.getNotes().length, isSelected: _selectedSection == 'Notes', onTap: () => setState(() => _selectedSection = 'Notes')),
               ],
             ),
           ),

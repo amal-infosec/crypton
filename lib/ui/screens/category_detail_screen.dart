@@ -690,9 +690,21 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(_selectedEntry!.title,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
-                overflow: TextOverflow.ellipsis,
+              child: Row(
+                children: [
+                  Text(_selectedEntry!.title,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (_selectedEntry!.isStealth) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.15), borderRadius: BorderRadius.circular(4)),
+                      child: const Text('STEALTH', style: TextStyle(color: Colors.redAccent, fontSize: 9, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
@@ -843,13 +855,27 @@ class _PasswordTileState extends State<_PasswordTile> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(widget.entry.title,
-                          style: TextStyle(
-                            color: widget.isSelected ? Colors.white : Colors.white.withOpacity(0.88),
-                            fontWeight: widget.isSelected ? FontWeight.bold : FontWeight.w500,
-                            fontSize: 14,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(widget.entry.title,
+                                style: TextStyle(
+                                  color: widget.isSelected ? Colors.white : Colors.white.withOpacity(0.88),
+                                  fontWeight: widget.isSelected ? FontWeight.bold : FontWeight.w500,
+                                  fontSize: 14,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (widget.entry.isStealth) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.15), borderRadius: BorderRadius.circular(4)),
+                                child: const Text('STEALTH', style: TextStyle(color: Colors.redAccent, fontSize: 8, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ],
                         ),
                         const SizedBox(height: 3),
                         Text(widget.entry.username,

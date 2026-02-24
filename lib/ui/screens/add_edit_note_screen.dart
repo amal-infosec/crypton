@@ -22,6 +22,7 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
   String _category = 'Personal';
+  bool _isStealth = false;
 
   final List<String> _categories = [
     'Personal',
@@ -44,6 +45,7 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
     _titleController = TextEditingController(text: n?.title);
     _contentController = TextEditingController();
     _category = n?.category ?? 'Personal';
+    _isStealth = n?.isStealth ?? false;
 
     if (n != null) {
         _decryptContent(n);
@@ -72,6 +74,7 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
         note.title = _titleController.text;
         note.encryptedContent = encryptedContent;
         note.category = _category;
+        note.isStealth = _isStealth;
         note.updatedAt = DateTime.now();
         await storage.saveNote(note);
       } else {
@@ -80,6 +83,7 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
           title: _titleController.text,
           encryptedContent: encryptedContent,
           category: _category,
+          isStealth: _isStealth,
         );
         await storage.saveNote(note);
       }
@@ -212,6 +216,16 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
           ),
           items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
           onChanged: (v) => setState(() => _category = v!),
+        ),
+        const SizedBox(height: 20),
+        SwitchListTile(
+          title: const Text('Stealth Mode', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          subtitle: const Text('Hide this note in the normal vault view', style: TextStyle(color: Colors.white54, fontSize: 12)),
+          secondary: Icon(Icons.security, color: _isStealth ? Colors.tealAccent : Colors.white70),
+          value: _isStealth,
+          activeColor: Colors.tealAccent,
+          onChanged: (v) => setState(() => _isStealth = v),
+          contentPadding: EdgeInsets.zero,
         ),
         const SizedBox(height: 20),
         Expanded(

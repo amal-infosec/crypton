@@ -33,6 +33,9 @@ class PasswordEntry extends HiveObject {
   @HiveField(8)
   DateTime updatedAt;
 
+  @HiveField(9)
+  bool isStealth;
+
   PasswordEntry({
     String? id,
     required this.title,
@@ -41,6 +44,7 @@ class PasswordEntry extends HiveObject {
     this.website,
     this.notes,
     this.category = 'General',
+    this.isStealth = false,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : id = id ?? const Uuid().v4(),
@@ -55,6 +59,7 @@ class PasswordEntry extends HiveObject {
     'website': website,
     'notes': notes,
     'category': category,
+    'isStealth': isStealth,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
   };
@@ -67,6 +72,7 @@ class PasswordEntry extends HiveObject {
       website: json['website'],
       notes: json['notes'],
       category: json['category'],
+      isStealth: json['isStealth'] ?? false,
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
   );
@@ -92,11 +98,15 @@ class SecureNote extends HiveObject {
   @HiveField(5)
   DateTime updatedAt;
 
+  @HiveField(6)
+  bool isStealth;
+
   SecureNote({
     String? id,
     required this.title,
     required this.encryptedContent,
     this.category = 'Personal',
+    this.isStealth = false,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : id = id ?? const Uuid().v4(),
@@ -108,6 +118,7 @@ class SecureNote extends HiveObject {
     'title': title,
     'encryptedContent': encryptedContent,
     'category': category,
+    'isStealth': isStealth,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
   };
@@ -117,6 +128,7 @@ class SecureNote extends HiveObject {
     title: json['title'],
     encryptedContent: json['encryptedContent'],
     category: json['category'],
+    isStealth: json['isStealth'] ?? false,
     createdAt: DateTime.parse(json['createdAt']),
     updatedAt: DateTime.parse(json['updatedAt']),
   );

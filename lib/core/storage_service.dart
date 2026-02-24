@@ -67,7 +67,9 @@ class StorageService extends ChangeNotifier {
   // --- Password Methods ---
 
   List<PasswordEntry> getPasswords() {
-    return _passwordBox.values.toList();
+    final all = _passwordBox.values.toList();
+    if (_isStealthUnlocked) return all;
+    return all.where((p) => !p.isStealth).toList();
   }
 
   Future<void> savePassword(PasswordEntry entry) async {
@@ -87,7 +89,9 @@ class StorageService extends ChangeNotifier {
   // --- Note Methods ---
   
   List<SecureNote> getNotes() {
-    return _noteBox.values.toList();
+    final all = _noteBox.values.toList();
+    if (_isStealthUnlocked) return all;
+    return all.where((n) => !n.isStealth).toList();
   }
 
   Future<void> saveNote(SecureNote note) async {

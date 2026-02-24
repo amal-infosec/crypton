@@ -325,25 +325,38 @@ class _PasswordListTabState extends State<PasswordListTab> {
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditPasswordScreen(entry: entry))),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.lock_outline, color: Colors.tealAccent.withOpacity(0.7), size: 24),
-                const SizedBox(height: 10),
-                Text(
-                  entry.title, 
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.white),
-                  overflow: TextOverflow.ellipsis,
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.lock_outline, color: Colors.tealAccent.withOpacity(0.7), size: 24),
+                    const SizedBox(height: 10),
+                    Text(
+                      entry.title, 
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.white),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      entry.username, 
+                      style: const TextStyle(color: Colors.white38, fontSize: 11),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                Text(
-                  entry.username, 
-                  style: const TextStyle(color: Colors.white38, fontSize: 11),
-                  overflow: TextOverflow.ellipsis,
+              ),
+              if (entry.isStealth)
+                Positioned(
+                  top: 8, right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                    child: const Text('STEALTH', style: TextStyle(color: Colors.redAccent, fontSize: 8, fontWeight: FontWeight.bold)),
+                  ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       );
@@ -485,7 +498,19 @@ class _NotesListTabState extends State<NotesListTab> {
              backgroundColor: Colors.white.withOpacity(0.05),
              child: const Icon(Icons.description_outlined, color: Colors.tealAccent, size: 18),
            ),
-           title: Text(note.title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+           title: Row(
+             children: [
+               Text(note.title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+               if (note.isStealth) ...[
+                 const SizedBox(width: 8),
+                 Container(
+                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                   decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                   child: const Text('STEALTH', style: TextStyle(color: Colors.redAccent, fontSize: 8, fontWeight: FontWeight.bold)),
+                 ),
+               ],
+             ],
+           ),
            subtitle: Text(note.category, style: const TextStyle(color: Colors.white38)),
            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditNoteScreen(note: note))),
         ),
