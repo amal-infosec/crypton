@@ -52,8 +52,23 @@ class StorageService extends ChangeNotifier {
 
     _isInitialized = true;
     
+    // Clean up temporary cache from previous sessions
+    _cleanupCache();
+
     if (isFakeMode && _passwordBox.isEmpty) {
       await _populateFakeData();
+    }
+  }
+
+  Future<void> _cleanupCache() async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final cacheDir = Directory(p.join(tempDir.path, '.crypton_cache'));
+      if (await cacheDir.exists()) {
+        await cacheDir.delete(recursive: true);
+      }
+    } catch (e) {
+      debugPrint('Error cleaning up cache: $e');
     }
   }
 

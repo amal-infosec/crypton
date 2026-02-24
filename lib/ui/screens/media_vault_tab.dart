@@ -175,6 +175,18 @@ class _MediaVaultTabState extends State<MediaVaultTab> {
                     ),
                     Row(
                       children: [
+                        _ActionButton(
+                          icon: Icons.lock_open,
+                          onTap: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => const StealthAuthScreen(),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 12),
                         if (hasPIN)
                           _ActionButton(
                             icon: Icons.lock_outline,
@@ -470,6 +482,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late final VideoController _controller;
   String? _tempPath;
   bool _isLoading = true;
+  String _loadingMessage = 'Initializing...';
 
   @override
   void initState() {
@@ -494,8 +507,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       final tempFileName = 'temp_${DateTime.now().millisecondsSinceEpoch}_${widget.media.fileName}';
       _tempPath = p.join(cacheDir.path, tempFileName);
 
-      await EncryptionService().decryptFileToDisk(sourcePath, _tempPath!, key);
+      setState(() => _loadingMessage = 'Decrypting file...');
+      await EncryptionService().decryptFileToDiskIsolate(sourcePath, _tempPath!, key);
       
+      if (mounted) setState(() => _loadingMessage = 'Preparing player...');
       await _player.open(Media(_tempPath!));
       if (mounted) setState(() => _isLoading = false);
     } catch (e) {
@@ -520,7 +535,17 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         children: [
           Center(
             child: _isLoading
-                ? const CircularProgressIndicator(color: Colors.tealAccent)
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CircularProgressIndicator(color: Colors.tealAccent),
+                      const SizedBox(height: 16),
+                      Text(
+                        _loadingMessage,
+                        style: const TextStyle(color: Colors.white54, fontSize: 13),
+                      ),
+                    ],
+                  )
                 : Video(controller: _controller),
           ),
           SafeArea(

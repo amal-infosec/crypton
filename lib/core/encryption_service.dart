@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:io';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 
 class EncryptionService {
   late encrypt.Encrypter _encrypter;
@@ -101,5 +102,33 @@ class EncryptionService {
   Future<void> decryptFileToDisk(String sourcePath, String destPath, Uint8List key) async {
     final bytes = await decryptFileToMemory(sourcePath, key);
     await File(destPath).writeAsBytes(bytes);
+  }
+
+  /// Decrypts a file to disk using a background Isolate for better performance on large files
+  Future<void> decryptFileToDiskIsolate(String sourcePath, String destPath, Uint8List key) async {
+    // Large files can block the UI thread during decryption.
+    // Use compute to offload to a background isolate.
+    await compute(_decryptFileIsolateWrapper, {
+      'sourcePath': sourcePath,
+      'destPath': destPath,
+      'key': key,
+    });
+  }
+
+  // Static wrapper because compute needs a top-level or static function
+  static Future<void> _decryptFileIsolateWrapper(Map<String, dynamic> params) async {
+    final String sourcePath = params['sourcePath'];
+    final String destPath = params['destPath'];
+    final Uint8List key = params['key'];
+
+    final data = await File(sourcePath).readAsBytes();
+    final keySpec = encrypt.Key(key);
+    final encrypter = encrypt.Encrypter(encrypt.AES(keySpec, mode: encrypt.AESMode.cbc));
+
+    final iv = encrypt.IV(data.sublist(0, 16));
+    final encryptedBytes = encrypt.Encrypted(data.sublist(16));
+
+    final decrypted = encrypter.decryptBytes(encryptedBytes, iv: iv);
+    await File(destPath).writeAsBytes(decrypted);
   }
 }

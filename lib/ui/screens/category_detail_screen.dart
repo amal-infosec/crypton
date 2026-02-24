@@ -5,6 +5,7 @@ import 'dart:ui';
 import '../../core/storage_service.dart';
 import '../../core/encryption_service.dart';
 import 'add_edit_password_screen.dart';
+import 'stealth_auth_screen.dart';
 
 class CategoryDetailScreen extends StatefulWidget {
   final String category;
@@ -436,6 +437,19 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                                 ],
                               ),
                             ),
+                            IconButton(
+                              icon: const Icon(Icons.lock_open, color: Colors.white70),
+                              onPressed: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) => const StealthAuthScreen(),
+                                );
+                              },
+                              tooltip: 'Unhide Items',
+                            ),
+                            const SizedBox(width: 8),
                             ElevatedButton(
                               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditPasswordScreen())),
                               style: ElevatedButton.styleFrom(

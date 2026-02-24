@@ -431,10 +431,27 @@ class _NotesListTabState extends State<NotesListTab> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text('NOTES', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white, letterSpacing: 2)),
-                            _LiquidGlassButton(
-                              label: 'Add',
-                              icon: Icons.add,
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditNoteScreen())),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.lock_open, color: Colors.white70),
+                                  onPressed: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      builder: (_) => const StealthAuthScreen(),
+                                    );
+                                  },
+                                  tooltip: 'Unhide Items',
+                                ),
+                                const SizedBox(width: 8),
+                                _LiquidGlassButton(
+                                  label: 'Add',
+                                  icon: Icons.add,
+                                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddEditNoteScreen())),
+                                ),
+                              ],
                             ),
                           ],
                         ),
