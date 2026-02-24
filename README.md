@@ -40,8 +40,8 @@ This method is optimized for **Hyprland/Wayland** and sets up your app launcher 
 3. **Launch**: Search for **"Crypton"** in your launcher (`wofi`, `rofi`, `tofi`, etc.).
 
 #### 🛠️ Manual Install
-1. **Prerequisites (Arch Linux)**: `sudo pacman -S --needed gtk3 libsecret xdg-desktop-portal-gtk alsa-lib libasound`
-2. **Prerequisites (Debian/Ubuntu)**: `sudo apt-get install libgtk-3-dev libsecret-1-dev libasound2-dev`
+1. **Prerequisites (Arch Linux)**: `sudo pacman -S --needed gtk3 libsecret xdg-desktop-portal-gtk alsa-lib libasound mpv`
+2. **Prerequisites (Debian/Ubuntu)**: `sudo apt-get install libgtk-3-dev libsecret-1-dev libasound2-dev libmpv-dev`
 3. **Setup**:
    - Extract the binary bundle to a permanent folder.
    - Make the binary executable: `chmod +x crypton`
@@ -58,8 +58,8 @@ This method is optimized for **Hyprland/Wayland** and sets up your app launcher 
 
 ### Build Prerequisites (Linux)
 To build the Linux version, you must install the following development packages:
-- **Arch Linux**: `sudo pacman -S --needed base-devel cmake pkg-config gtk3 libsecret alsa-lib`
-- **Debian/Ubuntu**: `sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev libsecret-1-dev libasound2-dev`
+- **Arch Linux**: `sudo pacman -S --needed base-devel cmake pkg-config gtk3 libsecret alsa-lib mpv`
+- **Debian/Ubuntu**: `sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev libsecret-1-dev libasound2-dev libmpv-dev`
 
 ### Build Commands
 - **Android Release (APK)**: `flutter build apk --release`
