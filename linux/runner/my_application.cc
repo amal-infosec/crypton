@@ -61,9 +61,9 @@ static void my_application_activate(GApplication* application) {
   FlView* view = fl_view_new(project);
   
   // Enable transparency if supported by the windowing system
-  GdkScreen* screen = gtk_window_get_screen(window);
-  GdkVisual* visual = gdk_screen_get_rgba_visual(screen);
-  if (visual != nullptr && gdk_screen_is_composited(screen)) {
+  GdkScreen* app_screen = gtk_window_get_screen(window);
+  GdkVisual* visual = gdk_screen_get_rgba_visual(app_screen);
+  if (visual != nullptr && gdk_screen_is_composited(app_screen)) {
     gtk_widget_set_visual(GTK_WIDGET(window), visual);
   }
 
