@@ -69,12 +69,13 @@ To build the Linux version, you must install the following development packages:
 
 ---
 
-## 🔒 Security
-
-Crypton follows the principle of zero-knowledge architecture. Your master password is never stored on disk; it is used only to derive the encryption key in volatile memory during your session.
+- **Android**: `flutter build apk --release`
+- **Windows**: `flutter build windows --release`
+- **Linux**: `flutter build linux --release`
+- **MSIX Installer**: `dart run msix:create`
 
 ---
 
 ## 📄 License
 
-This project is proprietary and confidential. Unauthorized copying of this file, via any medium, is strictly prohibited.
+This project is proprietary and confidential. Unauthorized copying is strictly prohibited.
