@@ -15,6 +15,7 @@ import '../../core/auth_service.dart';
 import '../../core/encryption_service.dart';
 import '../../models/data_models.dart';
 import 'media_auth_screen.dart';
+import 'stealth_auth_screen.dart';
 import '../widgets/linux_import_fallback.dart';
 import 'dart:ui' show ImageFilter;
 
