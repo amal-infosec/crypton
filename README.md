@@ -1,16 +1,19 @@
 # 🛡️ Crypton
 
-**Crypton** is a high-performance, ultra-secure password and notes manager designed for Windows and Linux. Featuring a stunning "Liquid Glass" glassmorphism aesthetic and robust encryption, Crypton provides a premium experience for managing your digital identity.
+**Crypton** is a high-performance, ultra-secure password and notes manager designed for Android, Windows, and Linux. Featuring a stunning "Liquid Glass" glassmorphism aesthetic and robust encryption, Crypton provides a premium, zero-knowledge experience for managing your digital identity.
 
 ---
 
-## ✨ Features
+## ✨ Pro Features
 
-- **Liquid Glass UI**: A modern, premium aesthetic with deep gradients and dynamic frosted glass effects.
-- **Robust Encryption**: Secure your sensitive data using industry-standard AES-256 encryption.
-- **Biometric Authentication**: Quick access using your system's biometric hardware (Windows Hello / Linux Biometrics).
-- **Multi-Platform Support**: Optimized for high performance on Android, Windows 11, and Linux environments.
-- **Privacy-First**: Your data stays local. No cloud storage, no telemetry.
+- **Zero-Knowledge Architecture**: Secure your sensitive data using industry-standard AES-256 encryption. Your master password is never stored on disk; it is used only to derive the encryption key in volatile memory during your session.
+- **Stealth Mode (Duress PIN)**: Create a secondary "fake" password that opens an empty or safe-for-work vault. Perfect for situations where you are forced to unlock the app. Global stealth access applies to all areas of the app.
+- **Secure Media Vault**: Import, encrypt, and view sensitive photos and videos directly within the app without leaving traces on your local storage. Protected by a separate PIN or biometric lock.
+- **Extensive Import/Export**: Import your passwords from major managers including 1Password, Bitwarden, Chrome, Dashlane, Firefox, LastPass, Safari, and more. Features a robust cross-desktop fallback for seamless importing on Windows and Linux.
+- **Biometric Authentication**: Quick access using your device's native biometric hardware (Android Fingerprint, Windows Hello, Linux Biometrics).
+- **Liquid Glass UI**: A modern, premium aesthetic with deep gradients, dynamic frosted glass effects, and seamless cross-platform animations.
+- **Hardened Android Security**: Leverages system-level protections (`FLAG_SECURE`) to prevent background snapshots, screen recording, and unauthorized screen capturing.
+- **Privacy-First (Zero Telemetry)**: Your data stays local. No cloud storage, no analytics, no telemetry.
 
 ---
 
@@ -30,7 +33,7 @@
 
 #### 🚀 Automated Install (Recommended)
 This method is optimized for **Hyprland/Wayland** and sets up your app launcher automatically.
-1. **Download**: Get `crypton-linux.zip` from Your GitHub repository's **Actions** tab.
+1. **Download**: Get `crypton-linux.zip` from your GitHub repository's **Actions** tab.
 2. **Install**:
    ```bash
    unzip crypton-linux.zip -d crypton-app
@@ -45,12 +48,11 @@ This method is optimized for **Hyprland/Wayland** and sets up your app launcher 
 3. **Setup**:
    - Extract the binary bundle to a permanent folder.
    - Make the binary executable: `chmod +x crypton`
-3. **Wayland Support**: To run natively on Wayland, use:
+4. **Wayland Support**: To run natively on Wayland, use:
    ```bash
    GDK_BACKEND=wayland ./crypton
    ```
-4. **Shortcut**: Copy the `crypton.desktop` file to `~/.local/share/applications/` and edit the `Exec` line to point to your binary's full path.
-5. **Import/Export**: If the file picker fails, the app provides a manual path entry fallback. For a seamless experience, ensure `xdg-desktop-portal-gtk` (or equivalent) is installed and active.
+5. **Shortcut**: Copy the `crypton.desktop` file to `~/.local/share/applications/` and edit the `Exec` line to point to your binary's full path.
 
 ---
 
@@ -65,14 +67,7 @@ To build the Linux version, you must install the following development packages:
 - **Android Release (APK)**: `flutter build apk --release`
 - **Windows Release**: `flutter build windows --release`
 - **Linux Release**: `flutter build linux --release`
-- **Installer (Windows)**: `flutter pub run msix:create`
-
----
-
-- **Android**: `flutter build apk --release`
-- **Windows**: `flutter build windows --release`
-- **Linux**: `flutter build linux --release`
-- **MSIX Installer**: `dart run msix:create`
+- **Installer (Windows)**: `dart run msix:create`
 
 ---
 

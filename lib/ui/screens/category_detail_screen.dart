@@ -6,6 +6,7 @@ import '../../core/storage_service.dart';
 import '../../core/encryption_service.dart';
 import 'add_edit_password_screen.dart';
 import 'stealth_auth_screen.dart';
+import '../widgets/app_background.dart';
 
 class CategoryDetailScreen extends StatefulWidget {
   final String category;
@@ -396,16 +397,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0F0C29), Color(0xFF302B63), Color(0xFF24243E)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
+      body: AppBackground(
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {

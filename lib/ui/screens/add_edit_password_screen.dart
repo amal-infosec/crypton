@@ -8,6 +8,7 @@ import 'dart:ui';
 import '../../core/encryption_service.dart';
 import '../../core/storage_service.dart';
 import '../../models/data_models.dart';
+import '../widgets/app_background.dart';
 
 class AddEditPasswordScreen extends StatefulWidget {
   final PasswordEntry? entry;
@@ -237,16 +238,7 @@ class _AddEditPasswordScreenState extends State<AddEditPasswordScreen> {
           IconButton(onPressed: _save, icon: const Icon(Icons.check, color: Colors.tealAccent), tooltip: 'Save'),
         ],
       ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0F0C29), Color(0xFF302B63), Color(0xFF24243E)],
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-          ),
-        ),
+      body: AppBackground(
         child: SafeArea(
           child: Column(
             children: [

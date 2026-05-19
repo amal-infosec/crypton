@@ -16,7 +16,7 @@ import '../../core/encryption_service.dart';
 import '../../models/data_models.dart';
 import 'media_auth_screen.dart';
 import 'stealth_auth_screen.dart';
-import '../widgets/linux_import_fallback.dart';
+import '../widgets/desktop_import_fallback.dart';
 import 'dart:ui' show ImageFilter;
 
 class MediaVaultTab extends StatefulWidget {
@@ -44,8 +44,8 @@ class _MediaVaultTabState extends State<MediaVaultTab> {
         allowMultiple: true,
       );
     } catch (e) {
-      if (!kIsWeb && Platform.isLinux) {
-        final fallbackPath = await showLinuxImportFallback(
+      if (!kIsWeb && (Platform.isLinux || Platform.isWindows)) {
+        final fallbackPath = await showDesktopImportFallback(
           context, 
           ['.jpg', '.jpeg', '.png', '.gif', '.mp4', '.mov', '.mkv'],
           title: '📂 Import Media',

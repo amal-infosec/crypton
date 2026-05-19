@@ -7,6 +7,7 @@ import 'dart:ui';
 import '../../core/encryption_service.dart';
 import '../../core/storage_service.dart';
 import '../../models/data_models.dart';
+import '../widgets/app_background.dart';
 
 class AddEditNoteScreen extends StatefulWidget {
   final SecureNote? note;
@@ -134,16 +135,7 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
           IconButton(onPressed: _save, icon: const Icon(Icons.check, color: Colors.tealAccent), tooltip: 'Save'),
         ],
       ),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0F0C29), Color(0xFF302B63), Color(0xFF24243E)],
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-          ),
-        ),
+      body: AppBackground(
         child: SafeArea(
           child: Column(
             children: [
@@ -228,14 +220,14 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
           contentPadding: EdgeInsets.zero,
         ),
         const SizedBox(height: 20),
-        Expanded(
-          child: _buildGlassTextField(
-            controller: _contentController,
-            label: 'Confidential Content',
-            icon: Icons.notes,
-            maxLines: null,
-            validator: (v) => v!.isEmpty ? 'Required' : null,
-          ),
+        _buildGlassTextField(
+          controller: _contentController,
+          label: 'Confidential Content',
+          icon: Icons.notes,
+          maxLines: null,
+          minLines: 8,
+          expands: false,
+          validator: (v) => v!.isEmpty ? 'Required' : null,
         ),
         const SizedBox(height: 24),
         SizedBox(
@@ -262,20 +254,23 @@ class _AddEditNoteScreenState extends State<AddEditNoteScreen> {
     required String label,
     required IconData icon,
     int? maxLines = 1,
+    int? minLines,
+    bool expands = false,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
+      minLines: minLines,
       validator: validator,
-      expands: maxLines == null,
-      textAlignVertical: maxLines == null ? TextAlignVertical.top : TextAlignVertical.center,
+      expands: expands,
+      textAlignVertical: (maxLines == null || expands) ? TextAlignVertical.top : TextAlignVertical.center,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white70),
-        alignLabelWithHint: maxLines == null,
-        prefixIcon: maxLines == null ? Padding(
+        alignLabelWithHint: maxLines == null || expands,
+        prefixIcon: (maxLines == null || expands) ? Padding(
           padding: const EdgeInsets.only(bottom: 200.0), 
           child: Icon(icon, color: Colors.white70)
         ) : Icon(icon, color: Colors.white70),

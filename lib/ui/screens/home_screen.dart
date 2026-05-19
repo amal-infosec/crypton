@@ -19,6 +19,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:window_manager/window_manager.dart';
 
 import 'desktop_home_screen.dart';
+import '../widgets/app_background.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -43,17 +44,8 @@ class MobileHomeScreen extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true, 
       extendBody: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0F0C29), Color(0xFF302B63), Color(0xFF24243E)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: const _MobileHomeContent(),
+      body: const AppBackground(
+        child: _MobileHomeContent(),
       ),
     );
   }
@@ -87,21 +79,32 @@ class _MobileHomeContentState extends State<_MobileHomeContent> {
             child: Container(
               height: 72,
               decoration: BoxDecoration(
-                color: const Color(0xFF1E1B4B).withOpacity(0.95),
                 borderRadius: BorderRadius.circular(36),
-                border: Border.all(color: Colors.white.withOpacity(0.12), width: 1),
                 boxShadow: [
                   BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 8)),
                 ],
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildDockItem(0, Icons.shield_outlined, Icons.shield, 'Vault'),
-                  _buildDockItem(1, Icons.play_circle_outline, Icons.play_circle, 'Media'),
-                  _buildDockItem(2, Icons.description_outlined, Icons.description, 'Notes'),
-                  _buildDockItem(3, Icons.settings_outlined, Icons.settings, 'Settings'),
-                ],
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(36),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      border: Border.all(color: Colors.white.withOpacity(0.12), width: 1),
+                      borderRadius: BorderRadius.circular(36),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildDockItem(0, Icons.shield_outlined, Icons.shield, 'Vault'),
+                        _buildDockItem(1, Icons.play_circle_outline, Icons.play_circle, 'Media'),
+                        _buildDockItem(2, Icons.description_outlined, Icons.description, 'Notes'),
+                        _buildDockItem(3, Icons.settings_outlined, Icons.settings, 'Settings'),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

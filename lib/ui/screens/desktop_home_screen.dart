@@ -13,6 +13,7 @@ import 'stealth_auth_screen.dart';
 import 'lock_screen.dart';
 import 'dart:ui';
 import 'dart:io' show Platform;
+import '../widgets/app_background.dart';
 
 class DesktopHomeScreen extends StatefulWidget {
   const DesktopHomeScreen({super.key});
@@ -37,36 +38,13 @@ class _DesktopHomeScreenState extends State<DesktopHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent, 
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF080808), Color(0xFF0F0F11)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-          ),
-          Positioned(
-            top: -200, right: -200,
-            child: Container(
-              width: 800, height: 800,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [const Color(0xFF7C3AED).withOpacity(0.03), Colors.transparent],
-                ),
-              ),
-            ),
-          ),
-          Row(
-            children: [
-              _buildSidebar(context),
-              Expanded(child: _buildMainContent()),
-            ],
-          ),
-        ],
+      body: AppBackground(
+        child: Row(
+          children: [
+            _buildSidebar(context),
+            Expanded(child: _buildMainContent()),
+          ],
+        ),
       ),
     );
   }

@@ -14,30 +14,80 @@ class StealthAuthScreen extends StatefulWidget {
 class _StealthAuthScreenState extends State<StealthAuthScreen> {
   final TextEditingController _pinController = TextEditingController();
   String _error = '';
+  bool _isSetupMode = false;
+  bool _isLoading = true;
 
-  Future<void> _unlock() async {
+  @override
+  void initState() {
+    super.initState();
+    _checkSetup();
+  }
+
+  Future<void> _checkSetup() async {
+    final auth = context.read<AuthService>();
+    final hasPin = await auth.hasStealthPIN();
+    if (mounted) {
+      setState(() {
+        _isSetupMode = !hasPin;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _submit() async {
     final auth = context.read<AuthService>();
     final storage = context.read<StorageService>();
     
-    final success = await auth.authenticateStealth(_pinController.text);
-    if (success) {
+    if (_pinController.text.length < 4) {
+      setState(() => _error = 'PIN must be at least 4 digits');
+      return;
+    }
+
+    if (_isSetupMode) {
+      await auth.setupStealthPIN(_pinController.text);
       storage.setStealthUnlocked(true);
       if (mounted) Navigator.pop(context);
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Stealth Vault Unlocked'),
+          content: Text('Stealth PIN Created & Unlocked'),
           backgroundColor: Colors.teal,
           behavior: SnackBarBehavior.floating,
         ),
       );
     } else {
-      setState(() => _error = 'Invalid Stealth PIN');
+      final success = await auth.authenticateStealth(_pinController.text);
+      if (success) {
+        storage.setStealthUnlocked(true);
+        if (mounted) Navigator.pop(context);
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Stealth Vault Unlocked'),
+            backgroundColor: Colors.teal,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else {
+        setState(() => _error = 'Invalid Stealth PIN');
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Container(
+        height: 300,
+        decoration: BoxDecoration(
+          color: const Color(0xFF111111),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border.all(color: Colors.white.withOpacity(0.1)),
+        ),
+        child: const Center(child: CircularProgressIndicator(color: Colors.tealAccent)),
+      );
+    }
+
     return Container(
       padding: EdgeInsets.only(
         left: 24, right: 24, top: 24,
@@ -74,14 +124,15 @@ class _StealthAuthScreenState extends State<StealthAuthScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Stealth Authorization',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              _isSetupMode ? 'Setup Stealth PIN' : 'Stealth Authorization',
+              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Enter secondary PIN to reveal hidden items',
-              style: TextStyle(color: Colors.white54, fontSize: 13),
+            Text(
+              _isSetupMode ? 'Create a secondary PIN to hide sensitive items' : 'Enter secondary PIN to reveal hidden items',
+              style: const TextStyle(color: Colors.white54, fontSize: 13),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
             TextField(
@@ -101,7 +152,7 @@ class _StealthAuthScreenState extends State<StealthAuthScreen> {
                   borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
                 ),
               ),
-              onSubmitted: (_) => _unlock(),
+              onSubmitted: (_) => _submit(),
             ),
             if (_error.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -111,13 +162,13 @@ class _StealthAuthScreenState extends State<StealthAuthScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _unlock,
+                onPressed: _submit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.tealAccent.withOpacity(0.2),
                   foregroundColor: Colors.tealAccent,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text('Unlock Partition', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(_isSetupMode ? 'Create & Unlock' : 'Unlock Partition', style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
             const SizedBox(height: 16),

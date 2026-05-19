@@ -1,25 +1,24 @@
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' show ImageFilter;
 
-class LinuxImportFallback extends StatefulWidget {
+class DesktopImportFallback extends StatefulWidget {
   final List<String> extensions;
   final String title;
 
-  const LinuxImportFallback({
+  const DesktopImportFallback({
     super.key,
     required this.extensions,
-    this.title = '📂 Linux Import Fallback',
+    this.title = '📂 Import Fallback',
   });
 
   @override
-  State<LinuxImportFallback> createState() => _LinuxImportFallbackState();
+  State<DesktopImportFallback> createState() => _DesktopImportFallbackState();
 }
 
-class _LinuxImportFallbackState extends State<LinuxImportFallback> {
+class _DesktopImportFallbackState extends State<DesktopImportFallback> {
   String? manualPath;
   List<File> downloadsFiles = [];
   bool _isLoading = true;
@@ -64,7 +63,7 @@ class _LinuxImportFallbackState extends State<LinuxImportFallback> {
       iconColor: Colors.tealAccent,
       children: [
         const Text(
-          'System file picker failed. This usually happens if xdg-desktop-portal is missing or misconfigured.',
+          'System file picker failed. You can select a recent file from Downloads or enter its absolute path manually.',
           style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
         ),
         const SizedBox(height: 16),
@@ -87,7 +86,7 @@ class _LinuxImportFallbackState extends State<LinuxImportFallback> {
               separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 1),
               itemBuilder: (context, i) {
                 final file = downloadsFiles[i];
-                final name = file.path.split('/').last;
+                final name = file.path.split(Platform.pathSeparator).last;
                 return ListTile(
                   dense: true,
                   visualDensity: VisualDensity.compact,
@@ -107,7 +106,7 @@ class _LinuxImportFallbackState extends State<LinuxImportFallback> {
           autofocus: downloadsFiles.isEmpty,
           style: const TextStyle(color: Colors.white, fontSize: 13),
           decoration: InputDecoration(
-            hintText: '/home/user/Downloads/file.ext',
+            hintText: Platform.isWindows ? r'C:\Users\Name\Downloads\file.ext' : '/home/user/Downloads/file.ext',
             hintStyle: const TextStyle(color: Colors.white24),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.white24)),
             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.white24)),
@@ -115,18 +114,15 @@ class _LinuxImportFallbackState extends State<LinuxImportFallback> {
           ),
           onChanged: (v) => manualPath = v,
         ),
-        const SizedBox(height: 8),
-        const Text(
-          '💡 Tip: Install xdg-desktop-portal-gtk or xdg-desktop-portal-kde to fix this permanently.',
-          style: TextStyle(color: Colors.tealAccent, fontSize: 10),
-        ),
       ],
       actions: [
         _dialogBtn(context, 'Cancel', () => Navigator.pop(context), outline: true),
         _dialogBtn(context, 'Import Path', () {
           if (manualPath != null && manualPath!.isNotEmpty) {
-            if (File(manualPath!).existsSync()) {
-              Navigator.pop(context, manualPath);
+            // Remove any surrounding quotes if user copy-pasted a path on Windows
+            var cleanPath = manualPath!.replaceAll('"', '').trim();
+            if (File(cleanPath).existsSync()) {
+              Navigator.pop(context, cleanPath);
             } else {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('File not found at specified path')));
             }
@@ -225,9 +221,9 @@ class _GlassDialog extends StatelessWidget {
   }
 }
 
-Future<String?> showLinuxImportFallback(BuildContext context, List<String> extensions, {String title = '📂 Linux Import Fallback'}) {
+Future<String?> showDesktopImportFallback(BuildContext context, List<String> extensions, {String title = '📂 Import Fallback'}) {
   return showDialog<String>(
     context: context,
-    builder: (context) => LinuxImportFallback(extensions: extensions, title: title),
+    builder: (context) => DesktopImportFallback(extensions: extensions, title: title),
   );
 }

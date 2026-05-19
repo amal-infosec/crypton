@@ -10,10 +10,14 @@ import 'package:media_kit/media_kit.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'ui/theme.dart';
 import 'ui/screens/lock_screen.dart';
+import 'ui/screens/terms_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+
+  final appSettingsBox = await Hive.openBox('app_settings');
+  final bool termsAccepted = appSettingsBox.get('terms_accepted', defaultValue: false);
 
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     await windowManager.ensureInitialized();
@@ -31,13 +35,14 @@ void main() async {
     });
   }
 
-  runApp(const XTMYEKApp());
+  runApp(XTMYEKApp(termsAccepted: termsAccepted));
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class XTMYEKApp extends StatefulWidget {
-  const XTMYEKApp({super.key});
+  final bool termsAccepted;
+  const XTMYEKApp({super.key, required this.termsAccepted});
 
   @override
   State<XTMYEKApp> createState() => _XTMYEKAppState();
@@ -91,7 +96,7 @@ class _XTMYEKAppState extends State<XTMYEKApp> with WidgetsBindingObserver {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
         scrollBehavior: const CustomScrollBehavior(),
-        home: const LockScreen(),
+        home: widget.termsAccepted ? const LockScreen() : const TermsScreen(),
       ),
     );
   }

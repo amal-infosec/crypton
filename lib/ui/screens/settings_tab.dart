@@ -16,7 +16,7 @@ import '../../core/auth_service.dart';
 import '../screens/lock_screen.dart';
 import '../../core/import_service.dart';
 import '../../models/data_models.dart';
-import '../widgets/linux_import_fallback.dart';
+import '../widgets/desktop_import_fallback.dart';
 
 class SettingsTab extends StatefulWidget {
   final String? activeTab;
@@ -59,7 +59,7 @@ class _SettingsTabState extends State<SettingsTab> {
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsBytes(encryptedBytes);
       
-      if (!kIsWeb && Platform.isLinux) {
+      if (!kIsWeb && (Platform.isLinux || Platform.isWindows)) {
         // Linux fix: use FilePicker.saveFile and fallback to Downloads folder if portal fails
         String? selectedPath;
         try {
@@ -112,9 +112,9 @@ class _SettingsTabState extends State<SettingsTab> {
       try {
         result = await FilePicker.platform.pickFiles();
       } catch (e) {
-        // Portal error on Linux usually
-        if (!kIsWeb && Platform.isLinux) {
-          final fallbackPath = await showLinuxImportFallback(context, ['.xtm']);
+        // Portal error on Linux/Windows usually
+        if (!kIsWeb && (Platform.isLinux || Platform.isWindows)) {
+          final fallbackPath = await showDesktopImportFallback(context, ['.xtm']);
           if (fallbackPath != null) {
             result = FilePickerResult([PlatformFile(path: fallbackPath, name: fallbackPath.split('/').last, size: File(fallbackPath).lengthSync())]);
           } else {
@@ -171,8 +171,8 @@ class _SettingsTabState extends State<SettingsTab> {
           allowedExtensions: extensions,
         );
       } catch (e) {
-        if (!kIsWeb && Platform.isLinux) {
-          final fallbackPath = await showLinuxImportFallback(context, extensions.map((e) => '.$e').toList());
+        if (!kIsWeb && (Platform.isLinux || Platform.isWindows)) {
+          final fallbackPath = await showDesktopImportFallback(context, extensions.map((e) => '.$e').toList());
           if (fallbackPath != null) {
              result = FilePickerResult([PlatformFile(path: fallbackPath, name: fallbackPath.split('/').last, size: File(fallbackPath).lengthSync())]);
           } else {

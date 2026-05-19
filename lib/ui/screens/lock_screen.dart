@@ -10,6 +10,7 @@ import '../../core/auth_service.dart';
 import '../../core/storage_service.dart';
 import '../../core/encryption_service.dart';
 import 'home_screen.dart';
+import '../widgets/app_background.dart';
 
 class LockScreen extends StatefulWidget {
   const LockScreen({super.key});
@@ -226,218 +227,163 @@ class _LockScreenState extends State<LockScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF0F172A), Color(0xFF1E1B4B), Color(0xFF020617)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      body: AppBackground(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 16,
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.06), 
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.12),
+                      width: 1.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.35),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Icon(
+                            Icons.shield_outlined,
+                            size: 64,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(height: 32),
+                          Text(
+                            _statusMessage,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 1.2,
+                                ),
+                          ),
+                          const SizedBox(height: 48),
+                          TextField(
+                            controller: _passController,
+                            focusNode: _passFocusNode,
+                            obscureText: _obscureText,
+                            autofocus: false,
+                            onSubmitted: (_) => _submitPassword(),
+                            keyboardType: (!kIsWeb && Platform.isAndroid) ? TextInputType.number : TextInputType.text,
+                            style: GoogleFonts.outfit(
+                              fontSize: 20,
+                              letterSpacing: 2,
+                              color: Colors.white,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Password',
+                              hintStyle: GoogleFonts.outfit(
+                                fontSize: 16,
+                                letterSpacing: 1,
+                                color: Colors.white54,
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.lock_outline,
+                                color: Colors.white70,
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureText
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                  color: Colors.white70,
+                                ),
+                                onPressed: () => setState(
+                                  () => _obscureText = !_obscureText,
+                                ),
+                              ),
+                              filled: true,
+                              fillColor: Colors.black,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withOpacity(0.05),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(
+                                  color: Colors.white,
+                                  width: 1.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed: _submitPassword,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 18,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              'Continue',
+                              style: GoogleFonts.outfit(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.1,
+                              ),
+                            ),
+                          ),
+                          if (!_isSetupMode) ...[
+                            const SizedBox(height: 24),
+                            TextButton.icon(
+                              onPressed: _tryBiometricAuth,
+                              icon: const Icon(
+                                Icons.fingerprint,
+                                color: Colors.white70,
+                              ),
+                              label: const Text(
+                                'Use Biometrics',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.white70,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
-          if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) ...[
-             // Simplified background for mobile to reduce lag
-          ] else ...[
-            Positioned(
-              top: -150,
-              left: -150,
-              child: Container(
-                width: 700,
-                height: 700,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFF6366F1).withOpacity(0.35),
-                      const Color(0xFF6366F1).withOpacity(0.05),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.5, 1.0],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -250,
-              right: -200,
-              child: Container(
-                width: 800,
-                height: 800,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFF8B5CF6).withOpacity(0.35),
-                      const Color(0xFF8B5CF6).withOpacity(0.05),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.6, 1.0],
-                  ),
-                ),
-              ),
-            ),
-          ],
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.06), 
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.12),
-                        width: 1.0,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.35),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const Icon(
-                              Icons.shield_outlined,
-                              size: 64,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(height: 32),
-                            Text(
-                              _statusMessage,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    letterSpacing: 1.2,
-                                  ),
-                            ),
-                            const SizedBox(height: 48),
-                            TextField(
-                              controller: _passController,
-                              focusNode: _passFocusNode,
-                              obscureText: _obscureText,
-                              autofocus: false,
-                              onSubmitted: (_) => _submitPassword(),
-                              keyboardType: (!kIsWeb && Platform.isAndroid) ? TextInputType.number : TextInputType.text,
-                              style: GoogleFonts.outfit(
-                                fontSize: 20,
-                                letterSpacing: 2,
-                                color: Colors.white,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Password',
-                                hintStyle: GoogleFonts.outfit(
-                                  fontSize: 16,
-                                  letterSpacing: 1,
-                                  color: Colors.white54,
-                                ),
-                                prefixIcon: const Icon(
-                                  Icons.lock_outline,
-                                  color: Colors.white70,
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscureText
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                    color: Colors.white70,
-                                  ),
-                                  onPressed: () => setState(
-                                    () => _obscureText = !_obscureText,
-                                  ),
-                                ),
-                                filled: true,
-                                fillColor: Colors.black,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide.none,
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide(
-                                    color: Colors.white.withOpacity(0.05),
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: const BorderSide(
-                                    color: Colors.white,
-                                    width: 1.5,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            ElevatedButton(
-                              onPressed: _submitPassword,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 18,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: Text(
-                                'Continue',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.1,
-                                ),
-                              ),
-                            ),
-                            if (!_isSetupMode) ...[
-                              const SizedBox(height: 24),
-                              TextButton.icon(
-                                onPressed: _tryBiometricAuth,
-                                icon: const Icon(
-                                  Icons.fingerprint,
-                                  color: Colors.white70,
-                                ),
-                                label: const Text(
-                                  'Use Biometrics',
-                                  style: TextStyle(color: Colors.white70),
-                                ),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: Colors.white70,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
       ),
     );
   }

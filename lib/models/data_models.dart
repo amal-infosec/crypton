@@ -36,6 +36,9 @@ class PasswordEntry extends HiveObject {
   @HiveField(9)
   bool? isStealth;
 
+  @HiveField(10)
+  bool? isDeepStealth;
+
   PasswordEntry({
     String? id,
     required this.title,
@@ -45,10 +48,12 @@ class PasswordEntry extends HiveObject {
     this.notes,
     this.category = 'General',
     bool? isStealth,
+    bool? isDeepStealth,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : id = id ?? const Uuid().v4(),
         isStealth = isStealth ?? false,
+        isDeepStealth = isDeepStealth ?? false,
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -61,6 +66,7 @@ class PasswordEntry extends HiveObject {
     'notes': notes,
     'category': category,
     'isStealth': isStealth,
+    'isDeepStealth': isDeepStealth,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
   };
@@ -74,6 +80,7 @@ class PasswordEntry extends HiveObject {
       notes: json['notes'],
       category: json['category'],
       isStealth: json['isStealth'] ?? false,
+      isDeepStealth: json['isDeepStealth'] ?? false,
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
   );
@@ -102,16 +109,21 @@ class SecureNote extends HiveObject {
   @HiveField(6)
   bool? isStealth;
 
+  @HiveField(7)
+  bool? isDeepStealth;
+
   SecureNote({
     String? id,
     required this.title,
     required this.encryptedContent,
     this.category = 'Personal',
     bool? isStealth,
+    bool? isDeepStealth,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : id = id ?? const Uuid().v4(),
        isStealth = isStealth ?? false,
+       isDeepStealth = isDeepStealth ?? false,
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
@@ -121,6 +133,7 @@ class SecureNote extends HiveObject {
     'encryptedContent': encryptedContent,
     'category': category,
     'isStealth': isStealth,
+    'isDeepStealth': isDeepStealth,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
   };
@@ -131,6 +144,7 @@ class SecureNote extends HiveObject {
     encryptedContent: json['encryptedContent'],
     category: json['category'],
     isStealth: json['isStealth'] ?? false,
+    isDeepStealth: json['isDeepStealth'] ?? false,
     createdAt: DateTime.parse(json['createdAt']),
     updatedAt: DateTime.parse(json['updatedAt']),
   );
@@ -153,6 +167,9 @@ class SecureMedia extends HiveObject {
   @HiveField(4)
   bool? isStealth;
 
+  @HiveField(7)
+  bool? isDeepStealth;
+
   @HiveField(5)
   DateTime createdAt;
 
@@ -165,10 +182,12 @@ class SecureMedia extends HiveObject {
     required this.fileName,
     required this.mediaType,
     bool? isStealth,
+    bool? isDeepStealth,
     DateTime? createdAt,
     this.thumbnailPath,
   }) : id = id ?? const Uuid().v4(),
        isStealth = isStealth ?? false,
+       isDeepStealth = isDeepStealth ?? false,
        createdAt = createdAt ?? DateTime.now();
 
   Map<String, dynamic> toJson() => {
@@ -177,6 +196,7 @@ class SecureMedia extends HiveObject {
     'fileName': fileName,
     'mediaType': mediaType,
     'isStealth': isStealth,
+    'isDeepStealth': isDeepStealth,
     'createdAt': createdAt.toIso8601String(),
     'thumbnailPath': thumbnailPath,
   };
@@ -187,6 +207,7 @@ class SecureMedia extends HiveObject {
     fileName: json['fileName'],
     mediaType: json['mediaType'],
     isStealth: json['isStealth'] ?? false,
+    isDeepStealth: json['isDeepStealth'] ?? false,
     createdAt: DateTime.parse(json['createdAt']),
     thumbnailPath: json['thumbnailPath'],
   );
