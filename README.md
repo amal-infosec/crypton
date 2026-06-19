@@ -70,7 +70,7 @@ To build the Linux version, you must install the following development packages:
 - **Installer (Windows)**: `dart run msix:create`
 
 ---
-
+...
 ## 📄 License
 
 This project is proprietary and confidential. Unauthorized copying is strictly prohibited.
